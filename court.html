@@ -119,10 +119,15 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .help dt { font-weight: 800; color: var(--ink); }
 .help dd { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
 .help-x { position: absolute; top: 0; right: 0; font-size: 22px; line-height: 1; }
+.street-x { position: absolute; z-index: 5; top: max(10px, env(safe-area-inset-top, 0px)); left: max(10px, env(safe-area-inset-left, 0px)); display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px 0 10px; border-radius: 999px; cursor: pointer; background: var(--yellow, #f6c343); color: #191426; border: 2px solid #191426; box-shadow: 0 3px 0 #191426, 0 6px 14px rgba(0,0,0,.35); font: 700 13px var(--font-ui, system-ui); letter-spacing: .05em; }
+.street-x svg { width: 18px; height: 18px; }
+.street-x:active { transform: translateY(2px); box-shadow: 0 1px 0 #191426; }
+.street-x:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 </style>
 
 <div class="stage" id="stage">
   <canvas id="game" aria-label="Side-view basketball half court. Move left and right, pick up the ball, and time your shot."></canvas>
+  <button class="street-x" id="to-street" hidden aria-label="Leave the court, back to the street"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>STREET</button>
   <div class="hud-btns">
       <button class="mini" id="info" aria-label="How to play and the barangay dictionary">?</button>
       <button class="mini" id="mute" aria-pressed="false" aria-label="Mute sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10H4z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -226,6 +231,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
     if (m.cmd === 'resume') { if (ac && ac.resume) ac.resume(); if (typeof onSceneResume === 'function') onSceneResume(m); }
   });
   function onSceneResume() { player.x = Math.max(player.x, 84); player.face = 1; }
+  setTimeout(() => { const sx = document.getElementById('to-street'); if (!sx || !EMBED) return; sx.hidden = false; sx.addEventListener('click', () => { if (horse) { pop('Finish the game first', 150, GROUND - 100, '#f6c343', 13); return; } keys.left = keys.right = false; goScene('hub', { from: 'court' }); }); }, 0);
 
   function ensureAudio() {
     if (ac) return;
@@ -2563,6 +2569,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
         case 'crouch': P.lN = [0.95, 1.9]; P.lF = [0.8, 1.8]; P.aN = [0.9, 0.7]; P.aF = [0.8, 0.7]; P.lean = 0.3; break;
         case 'sit': P.lN = [1.48, 1.48]; P.lF = [1.42, 1.42]; P.aN = [0.55, 0.75]; P.aF = [0.45, 0.8]; P.sit = true; break;
         case 'ready': P.lN = [0.62, 1.05]; P.lF = [0.48, 0.95]; P.aN = [0.85, 0.35]; P.aF = [0.75, 0.35]; P.lean = 0.22; break;
+        case 'dive': P.lN = [-0.22, 0.2]; P.lF = [0.06, 0.4]; P.aN = [2.95, 0.05]; P.aF = [3.2, 0.12]; break;   // a lay-out: arms overhead, body straight (tipped over by the caller)
         case 'bump': P.lN = [0.72, 1.25]; P.lF = [0.6, 1.15]; P.aN = [1.12, 0]; P.aF = [1.08, 0]; P.lean = 0.3; break;
         case 'set': P.lN = [0.2, 0.35]; P.lF = [0.1, 0.3]; P.aN = [4.15, -0.55]; P.aF = [2.45, 0.4]; P.tilt = -0.15; break;
         case 'toss': P.aF = [2.45, 0.4]; P.aN = [0.25, 0.3]; P.tilt = -0.1; break;

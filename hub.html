@@ -246,6 +246,60 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 .table-note { color: var(--muted); font-size: 13px; text-align: center; margin: 0; }
 
 @media (prefers-reduced-motion: reduce) { #act.ready { animation: none; } .pc { animation: none; } }
+/* ---------- exits you can't miss: the panel header rides along while you scroll ---------- */
+.panel-head { position: sticky; top: calc(-1 * max(18px, env(safe-area-inset-top, 0px))); z-index: 6;
+  margin: 0 -12px; padding: max(12px, env(safe-area-inset-top, 0px)) 12px 14px;
+  background: linear-gradient(rgba(16,12,32,.98) 72%, rgba(16,12,32,0)); }
+.panel .close, .game-head .close {
+  width: auto; height: 44px; padding: 0 16px 0 12px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  background: var(--yellow); color: #191426; border: 2px solid #191426;
+  box-shadow: 0 4px 0 #191426, 0 8px 18px rgba(0,0,0,.4);
+  font: 700 26px/1 var(--font-ui); transition: transform .08s ease, box-shadow .08s ease;
+}
+.panel .close::after, .game-head .close::after { font: 700 14px/1 var(--font-ui); letter-spacing: .06em; }
+.panel .close::after { content: 'CLOSE'; }
+.game-head .close::after { content: 'LEAVE'; }
+.panel .close:hover, .game-head .close:hover { background: #ffd65e; }
+.panel .close:active, .game-head .close:active { transform: translateY(3px); box-shadow: 0 1px 0 #191426, 0 4px 10px rgba(0,0,0,.4); }
+.panel .close:focus-visible, .game-head .close:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+@media (max-width: 420px) { .panel .close, .game-head .close { height: 40px; padding: 0 13px 0 10px; font-size: 23px; } .panel .close::after, .game-head .close::after { font-size: 12.5px; } }
+/* pepper: the way out is a real button */
+.pep-hud { height: 46px; padding-right: 5px; }
+.pep-x { background: #e2433a; color: #fff; border: 2px solid #191426; font: 700 14px var(--font-ui); letter-spacing: .04em; padding: 8px 14px; box-shadow: 0 3px 0 #191426; }
+.pep-x:hover { background: #f05046; }
+.pep-x:active { transform: translateY(2px); box-shadow: 0 1px 0 #191426; }
+/* ---------- blackjack decisions: only what you can do, popping up when it's your call ---------- */
+#game-cards .row.decide { display: grid; justify-items: center; gap: 7px; }
+#game-cards .decide-head { font: 700 11.5px/1 var(--font-ui); letter-spacing: .12em; color: #ffd25c; background: rgba(14,10,24,.78); border: 1.5px solid rgba(255,210,92,.45); padding: 6px 14px; border-radius: 999px; white-space: nowrap; }
+#game-cards .decide-head:empty { display: none; }
+#game-cards .decide-btns { display: flex; gap: 9px; align-items: flex-end; justify-content: center; flex-wrap: nowrap; }
+#game-cards .btn.act { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; line-height: 1.02; border: 2px solid #191426; box-shadow: 0 4px 0 #191426, 0 8px 18px rgba(0,0,0,.45) !important; transition: transform .1s ease; }
+#game-cards .btn.act small { font: 600 10.5px/1 var(--font-ui); opacity: .75; letter-spacing: .02em; white-space: nowrap; }
+#game-cards .btn.act small:empty { display: none; }
+#game-cards .btn.act:hover { transform: translateY(-2px) scale(1.03); }
+#game-cards .btn.act:active { transform: translateY(3px); box-shadow: 0 1px 0 #191426 !important; }
+#game-cards .btn.main { font-size: 21px; padding: 12px 22px 10px; min-width: 112px; background: var(--yellow); color: #191426; }
+#game-cards #hit { background: #7dd3a0; }
+#game-cards #stand { background: #ff9a7a; }
+#game-cards .btn.sec { font-size: 15px; padding: 9px 14px 8px; background: #f7f1e1; color: #191426; }
+#game-cards .btn.tiny { font-size: 13px; padding: 7px 11px 6px; background: #e2433a; color: #fff; }
+@keyframes decidePop { 0% { transform: translateY(22px) scale(.6); opacity: 0; } 62% { transform: translateY(-5px) scale(1.08); opacity: 1; } 100% { transform: none; opacity: 1; } }
+@keyframes decideBreathe { 0%, 100% { transform: none; } 50% { transform: translateY(-2px) scale(1.035); } }
+#game-cards .pop .decide-head { animation: decidePop .38s cubic-bezier(.2,.9,.3,1.25) both; }
+#game-cards .pop .btn.act { animation: decidePop .44s cubic-bezier(.2,.9,.3,1.25) both; }
+#game-cards .pop .btn.main { animation: decidePop .44s cubic-bezier(.2,.9,.3,1.25) both, decideBreathe 1.9s ease-in-out .9s infinite; }
+#game-cards .pop .btn.act:nth-child(2) { animation-delay: .05s; } #game-cards .pop .btn.act:nth-child(3) { animation-delay: .1s; }
+#game-cards .pop .btn.act:nth-child(4) { animation-delay: .04s; } #game-cards .pop .btn.act:nth-child(5) { animation-delay: .1s, 1s; } #game-cards .pop .btn.act:nth-child(6) { animation-delay: .15s, 1.1s; } #game-cards .pop .btn.act:nth-child(7) { animation-delay: .2s; }
+@media (prefers-reduced-motion: reduce) { #game-cards .pop .btn.act, #game-cards .pop .decide-head { animation: none; } }
+@media (max-width: 639px) {
+  #game-cards .decide-btns { gap: 6px; }
+  #game-cards .btn.main { font-size: 17px; padding: 10px 14px 8px; min-width: 84px; }
+  #game-cards .btn.sec { font-size: 13px; padding: 8px 9px 7px; }
+  #game-cards .btn.tiny { font-size: 12px; padding: 6px 8px 5px; }
+  #game-cards .btn.act small { font-size: 9.5px; }
+  #game-cards .decide-head { font-size: 10px; padding: 5px 11px; }
+}
 </style>
 
 <canvas id="scene" aria-label="A dense street in Taguig City. R.J. can walk to a print shop, an electronics repair stall, the alley gate to the basketball court, the barangay hall, a sari-sari store, the SK youth center, and a volleyball corner at the end of the street where Han and the kids hang out."></canvas>
@@ -273,7 +327,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 <div id="act-label" aria-hidden="true"></div>
 <div id="spike-label" aria-hidden="true" hidden>Jump</div>
 <button class="round" id="spike" aria-label="Jump" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V7M6.5 12.5 12 7l5.5 5.5M6 4h12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-<div class="pep-hud" id="pep-hud" hidden><span>RALLY<b id="pep-r">0</b></span><span class="sep"></span><span>BEST<b id="pep-b">0</b></span><button class="pep-x" id="pep-leave">Leave ✕</button></div>
+<div class="pep-hud" id="pep-hud" hidden><span>RALLY<b id="pep-r">0</b></span><span class="sep"></span><span>BEST<b id="pep-b">0</b></span><button class="pep-x" id="pep-leave">✕ LEAVE</button></div>
 <button class="round" id="act" aria-label="Go inside" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg></button>
 
 <div class="hint gone" id="hint">Walk with <b>← →</b> (hold to run) &nbsp;·&nbsp; at a glowing door, press <b>E</b> or <b>●</b> to go inside</div>
@@ -390,11 +444,11 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     <div class="table-msg" id="table-msg" aria-live="polite">Tap the fishball cup to bet one fishball at a time.</div>
     <div class="controls">
       <div class="row" id="cut-row" hidden><button class="btn" id="cut-btn">Cut it for me</button></div>
-      <div class="row" id="play-row"><button class="btn" id="deal">Deal</button><button class="btn" id="hit">Hit</button><button class="btn" id="stand">Stand</button><button class="btn alt" id="double">Double</button><button class="btn alt" id="split">Split</button></div>
-      <div class="row" id="ins-row" hidden><button class="btn" id="ins-yes">Insurance</button><button class="btn alt" id="ins-no">No insurance</button></div>
-      <div class="row"><button class="btn ghost sr" id="bet-sub">Take back a fishball</button><button class="btn ghost sr" id="bet-add">Bet a fishball</button></div>
+      <div class="row decide" id="play-row"><div class="decide-head" id="decide-head"></div><div class="decide-btns"><button class="btn act sec" id="rebet">Re-bet<small></small></button><button class="btn act main" id="deal">Deal<small></small></button><button class="btn act tiny" id="allin">All in<small></small></button><button class="btn act sec" id="double">Double<small></small></button><button class="btn act main" id="hit">Hit<small></small></button><button class="btn act main" id="stand">Stand<small></small></button><button class="btn act sec" id="split">Split<small></small></button></div></div>
+      <div class="row decide" id="ins-row" hidden><div class="decide-head">DEALER SHOWS AN ACE · INSURANCE?</div><div class="decide-btns"><button class="btn act sec" id="ins-yes">Insurance<small></small></button><button class="btn act main" id="ins-no">No thanks<small>the book says no</small></button></div></div>
+      <div class="row"><button class="btn ghost sr" id="bet-sub">Take back a fishball</button><button class="btn ghost sr" id="bet-add">Bet a fishball</button><button class="btn ghost sr" id="pp-add">Bet a fishball on Perfect Pairs</button><button class="btn ghost sr" id="pp-clear">Take back the Perfect Pairs bet</button></div>
       <div class="row" id="broke-row" hidden><button class="btn" id="go-food">Get fishballs from Mang Boy</button></div>
-      <p class="table-note">Tap the cup to bet, the circle to take one back. H hit · S stand · D deal/double · P split · I/N insurance. Same rules as my ARM Assembly blackjack build.</p>
+      <p class="table-note">Tap the cup to bet, the circle to take one back. H hit · S stand · D deal/double · P split · I/N insurance · Q pairs side bet (X clears) · R re-bet · A all in. The count is doodled on the felt: R in the heart, T on the card. Same rules as my ARM Assembly blackjack build.</p>
     </div>
     </div>
   </div>
@@ -1157,6 +1211,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
         case 'crouch': P.lN = [0.95, 1.9]; P.lF = [0.8, 1.8]; P.aN = [0.9, 0.7]; P.aF = [0.8, 0.7]; P.lean = 0.3; break;
         case 'sit': P.lN = [1.48, 1.48]; P.lF = [1.42, 1.42]; P.aN = [0.55, 0.75]; P.aF = [0.45, 0.8]; P.sit = true; break;
         case 'ready': P.lN = [0.62, 1.05]; P.lF = [0.48, 0.95]; P.aN = [0.85, 0.35]; P.aF = [0.75, 0.35]; P.lean = 0.22; break;
+        case 'dive': P.lN = [-0.22, 0.2]; P.lF = [0.06, 0.4]; P.aN = [2.95, 0.05]; P.aF = [3.2, 0.12]; break;   // a lay-out: arms overhead, body straight (tipped over by the caller)
         case 'bump': P.lN = [0.72, 1.25]; P.lF = [0.6, 1.15]; P.aN = [1.12, 0]; P.aF = [1.08, 0]; P.lean = 0.3; break;
         case 'set': P.lN = [0.2, 0.35]; P.lF = [0.1, 0.3]; P.aN = [4.15, -0.55]; P.aF = [2.45, 0.4]; P.tilt = -0.15; break;
         case 'toss': P.aF = [2.45, 0.4]; P.aN = [0.25, 0.3]; P.tilt = -0.1; break;
@@ -1632,7 +1687,12 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     else if (jh > 1) { ra = (rj.jv || 0) < 0 ? 'fall' : 'jump'; ri = ra === 'fall' ? 0 : 2; }
     else if (rj.moving) { ra = run ? 'run' : 'walk'; ri = ((((rj.walkT || 0) / (Math.PI * 2)) * 6) % 6 + 6) % 6; }
     else [ra, ri] = CHARS.idle('rj', time);
-    if (!CHARS.draw(ctx, 'rj', ra, ri, x, b, 86, f, { t: time })) {
+    // the dive: the whole body tips forward from the feet into a lay-out, arms reaching ahead along the ground
+    const dv = rj.dive, dr = dv ? (dv.t < 0.14 ? dv.t / 0.14 : dv.t > dv.dur ? clamp(1 - (dv.t - dv.dur) / 0.3, 0, 1) : 1) : 0;
+    if (dv) { ra = dr > 0.55 ? 'dive' : 'crouch'; ri = 0; ctx.save(); ctx.translate(x, b - 9 * dr); ctx.rotate(f * dr * 1.45); ctx.translate(-x, -b); }
+    const drew = CHARS.draw(ctx, 'rj', ra, ri, x, b, 86, f, { t: time });
+    if (dv) ctx.restore();
+    if (!drew) {
       drawArms(true);
       ctx.save(); ctx.translate(x, b); ctx.scale(f, 1); drawRJ({}, RJL, u, rj.ride || jh > 1, sw); ctx.restore();
       drawArms(false);
@@ -1722,7 +1782,8 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   const pops = [], dust = [];
   Object.assign(rj, { vx: 0, hold: 0, hdir: 0, lean: 0, slide: false, jh: 0, jv: 0, spk: null, vp: null, armT: 0, passCool: 0, dustT: 0, goto: null });
 
-  const TILLY = { legL: 9, torso: 10, headR: 6.6, top: '#ff9ec4', shoe: '#f4f1ea', tie: '#ff4f8b', pig: 'short', hyper: true, ph: 0.7 };
+  // Tilly is a little Boo: a giant pink tee, purple leggings, two tiny pigtails up top, huge eyes
+  const TILLY = { legL: 9, torso: 9.5, headR: 8, top: '#f7a8cc', shoe: '#8a62c8', legCol: '#a07ad8', tie: '#8a62c8', pig: 'short', boo: true, hyper: true, ph: 0.7 };
   const THEA = { legL: 15, torso: 12, headR: 7.2, top: '#f6c343', shoe: '#ff6fa8', tie: '#7ad0ff', pig: 'long', glasses: true, dress: true, ph: 1.9 };
 
   // ---------- a volleyball ----------
@@ -1740,24 +1801,89 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 
   // ---------- toddler-proportioned kids: Tilly (1) and Thea (4) ----------
   function drawTot(x, y, K) {
-    const s = K.legL > 12 ? 0.5 : 0.43, pose = K.pose, t = time + (K.ph || 0);
-    const P = { s, face: K.face || 1, ph: K.ph, skin: '#f1d0ab', hair: '#17121a', hairStyle: 'pigtails', tie: K.tie, shirt: K.top, pants: K.dress ? K.top : '#3b4a6e', shoe: K.shoe, glasses: K.glasses, shadow: !!K.shadow };
-    let yy = y;
-    if (pose === 'sit' || pose === 'lap') { P.pose = 'sit'; yy = y + 17 * s; }
-    else if (pose === 'run' || pose === 'walk') P.pose = pose;
-    else P.pose = 'stand';
-    if (K.cheer || K.flap) P.act = 'cheer';
-    if (pose === 'throw') P.act = 'throw';
-    if (K.hyper && pose === 'stand') yy -= Math.abs(Math.sin(t * 9)) * 2.6;
-    CHIBI.draw(ctx, x, yy, P, time);
-    const f = K.face || 1;
-    if (K.ball) drawVB(x + f * 9 * s * 2, yy - 30 * s * 1.1, 0.4);
-    else if (pose === 'throw' && K.withBall && (K.k || 0) < 0.5) drawVB(x + f * 12 * s * 2, yy - 52 * s, 0.4);
+    const f = K.face || 1, t = time + (K.ph || 0), L = K.legL, TB = K.torso, R = K.headR, skin = '#f1d0ab', hair = '#17121a', KS = K.ks || 1.3;
+    const pose = K.pose, boo = !!K.boo, legC = K.legCol || skin;
+    ctx.save(); ctx.translate(x, y);
+    if (K.shadow) { ctx.fillStyle = 'rgba(10,6,16,.25)'; ctx.beginPath(); ctx.ellipse(0, 0, 8 * KS, 2 * KS, 0, 0, 7); ctx.fill(); }
+    ctx.scale(f * KS, KS);
+    let hip = (pose === 'sit' || pose === 'lap') ? 0 : -L;
+    if (K.hyper) ctx.translate(0, -Math.abs(Math.sin(t * 9)) * (pose === 'stand' ? 2.6 : 1.3));
+    const lw = L > 12 ? 4.6 : 4.4;
+    const leg = (x1, y1, x2, y2, x3, y3) => {
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.lineTo(x3, y3);
+      ctx.strokeStyle = OL; ctx.lineWidth = lw + 2.6; ctx.stroke(); ctx.strokeStyle = legC; ctx.lineWidth = lw; ctx.stroke();
+      rr(x3 - 2, y3 - 2, 6.5, 3.6, 1.8, K.shoe, 1);
+    };
+    if (pose === 'sit') { const sw = Math.sin(t * 3.2) * 4; leg(-2, 0, L * 0.5, 1, L * 0.5 - sw * 0.7, L * 0.62); leg(0, 0, L * 0.55, 1, L * 0.55 + sw, L * 0.62); }
+    else if (pose === 'lap') { const sw = Math.sin(t * 8) * 2.4; leg(-2, 0, L * 0.6, 1, L * 0.6 - sw, L * 0.55); leg(0, 0, L * 0.65, 1, L * 0.65 + sw, L * 0.55); }
+    else if (pose === 'run' || pose === 'walk') { const a = Math.sin(t * (pose === 'run' ? 17 : 11)) * L * 0.38; leg(0, hip, a * 0.5, hip * 0.5, a, -1.6); leg(0, hip, -a * 0.5, hip * 0.5, -a, -1.6); }
+    else if (pose === 'throw' || K.bump) { leg(0, hip, 2, hip * 0.5, 3, -1.6); leg(-2.5, hip, -3, hip * 0.5, -5, -1.6); }
+    else { const k = K.hyper ? Math.sin(t * 9) * 1.2 : 0; leg(0, hip, 1.5 + k, hip * 0.5, 1.5, -1.6); leg(-2.5, hip, -2.5 - k, hip * 0.5, -3, -1.6); }
+    const top = hip - TB, sh = [1, top + 3.5];
+    // hands
+    let hb, hf, ballAt = null;
+    if (K.ball) { const bx = R + 2.5 + Math.sin(t * 5) * 1.6, by = top + TB * 0.45 + Math.cos(t * 7) * 1.6; ballAt = [bx, by]; hb = [bx - 3, by + 1]; hf = [bx + 1, by + 3]; }
+    else if (K.bump) { hb = [R * 1.05, hip - 3]; hf = [R * 1.2, hip - 2]; }   // a two-handed bump: arms straight out together
+    else if (pose === 'throw') { const k = clamp(K.k || 0, 0, 1), ax = lerp(R * 0.6, R + 3, k), ay = lerp(hip - 2, top - 9, k); hb = [ax - 2, ay]; hf = [ax, ay + 1]; if (K.k < 0.5 && K.withBall) ballAt = [ax + 2, ay - 3]; }
+    else if (K.cheer) { const s = Math.sin(t * 14) * 2; hb = [-3, top - 9 + s]; hf = [4, top - 10 - s]; }
+    else if (K.flap) { const s = Math.sin(t * 13) * 5; hb = [-6, top + 4 + s]; hf = [7, top + 4 - s]; }
+    else if (pose === 'sit') { hb = [3, hip - 1]; hf = [5, hip - 1]; }
+    else { hb = [-2, hip - 2]; hf = [4, hip - 1]; }
+    ctx.strokeStyle = shade(skin, 0.86); limb(sh[0], sh[1], hb[0], hb[1], 2.8);
+    // body: Boo's giant pink tee for Tilly, a little dress for Thea
+    if (boo) {
+      const hem = (pose === 'sit' || pose === 'lap') ? hip + 2 : hip + L * 0.42;
+      ctx.beginPath(); ctx.moveTo(-R * 0.55, top + 0.5); ctx.quadraticCurveTo(0, top - 1, R * 0.62, top + 0.5); ctx.lineTo(R * 0.98, hem); ctx.quadraticCurveTo(0, hem + 1.6, -R * 0.98, hem); ctx.closePath();
+      ctx.fillStyle = K.top; ctx.fill(); ctx.lineWidth = 1.4; ctx.strokeStyle = OL; ctx.stroke();
+      ctx.strokeStyle = shade(K.top, 0.82); ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(-R * 0.2, top + 4); ctx.lineTo(-R * 0.35, hem - 1); ctx.moveTo(R * 0.35, top + 5); ctx.lineTo(R * 0.5, hem - 1.5); ctx.stroke();   // folds in the too-big shirt
+    } else if (K.dress) { ctx.beginPath(); ctx.moveTo(-R * 0.6, top + 1); ctx.lineTo(R * 0.7, top + 1); ctx.lineTo(R * 1.05, hip + 1.5); ctx.lineTo(-R * 0.95, hip + 1.5); ctx.closePath(); ctx.fillStyle = K.top; ctx.fill(); ctx.lineWidth = 1.4; ctx.strokeStyle = OL; ctx.stroke(); ctx.fillStyle = '#fff'; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(-R * 0.5 + i * R * 0.45, hip - 2, 0.9, 0, 7); ctx.fill(); } }
+    else { ctx.beginPath(); ctx.roundRect(-R * 0.72, top, R * 1.5, TB + 2, [R * 0.55, R * 0.55, 3, 3]); ctx.fillStyle = K.top; ctx.fill(); ctx.lineWidth = 1.4; ctx.strokeStyle = OL; ctx.stroke(); }
+    if (ballAt) drawVB(ballAt[0], ballAt[1], t * 2.2);
+    ctx.strokeStyle = skin; limb(sh[0], sh[1], hf[0], hf[1], 2.8);
+    if (boo) { ctx.fillStyle = K.top; ctx.beginPath(); ctx.ellipse(sh[0] + 1, sh[1] + 0.5, 2.8, 2.3, 0, 0, 7); ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = OL; ctx.stroke(); }   // floppy sleeve
+    // head, bowl cut, pigtails
+    const hx = 1.5, hc = top - R * 0.82;
+    const pig = (dx, dy, near) => {
+      ctx.save(); ctx.translate(hx + dx, hc + dy);
+      if (K.pig === 'long') { ctx.rotate(0.3 + Math.sin(t * 3.2 + (near ? 0 : 1)) * 0.12); ell(0, R * 0.8, R * 0.26, R * 0.8, hair, 1.1); circ(0, 0, 1.5, K.tie, 0.7); }
+      else if (boo) { ctx.rotate(-0.35 + (near ? 0.2 : -0.5) + Math.sin(t * 9) * 0.12); ell(0, -R * 0.36, R * 0.24, R * 0.4, hair, 1); circ(0, 0, 1.6, K.tie, 0.7); }
+      else { ctx.rotate(-0.7 + (near ? 0 : -0.5) + Math.sin(t * 9) * 0.15); ell(0, -R * 0.38, R * 0.2, R * 0.42, hair, 1); circ(0, 0, 1.3, K.tie, 0.6); }
+      ctx.restore();
+    };
+    if (K.pig === 'long') pig(-R * 0.55, -R * 0.2, false); else if (boo) pig(-R * 0.45, -R * 0.82, false); else pig(-R * 0.3, -R * 0.9, false);
+    circ(hx, hc, R, skin, 1.5);
+    if (boo) {
+      // Boo's hair: a round black cap with a short fringe that stops high on the forehead
+      ctx.beginPath(); ctx.arc(hx, hc, R + 0.7, Math.PI * 0.78, Math.PI * 1.96);
+      ctx.quadraticCurveTo(hx + R * 0.9, hc - R * 0.3, hx + R * 0.55, hc - R * 0.38); ctx.quadraticCurveTo(hx + R * 0.15, hc - R * 0.22, hx - R * 0.15, hc - R * 0.3);
+      ctx.quadraticCurveTo(hx - R * 0.35, hc + R * 0.1, hx - R * 0.62, hc + R * 0.62); ctx.closePath();
+    } else {
+      ctx.beginPath(); ctx.arc(hx, hc, R + 0.7, Math.PI * 0.84, Math.PI * 1.9);
+      ctx.lineTo(hx + R * 1.03, hc - R * 0.12); ctx.lineTo(hx + R * 0.2, hc - R * 0.2); ctx.lineTo(hx - R * 0.22, hc + R * 0.25); ctx.lineTo(hx - R * 0.58, hc + R * 0.6); ctx.closePath();
+    }
+    ctx.fillStyle = hair; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = OL; ctx.stroke();
+    ctx.strokeStyle = '#3a3340'; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.arc(hx, hc, R * 0.7, Math.PI * 1.25, Math.PI * 1.6); ctx.stroke();   // shine
+    if (K.pig === 'long') pig(-R * 0.75, -R * 0.1, true); else if (boo) pig(R * 0.1, -R * 0.98, true); else pig(-R * 0.75, -R * 0.45, true);
+    if (boo) {
+      // big round shiny eyes, round pink cheeks, a wide open grin
+      const ex = hx + R * 0.5, ey = hc + R * 0.08;
+      ctx.fillStyle = OL; ctx.beginPath(); ctx.ellipse(ex, ey, R * 0.16, R * 0.22, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex + R * 0.05, ey - R * 0.08, R * 0.065, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(ex - R * 0.05, ey + R * 0.07, R * 0.03, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,110,140,.45)'; ctx.beginPath(); ctx.ellipse(hx + R * 0.24, hc + R * 0.46, R * 0.2, R * 0.14, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#7a2032'; ctx.beginPath(); ctx.moveTo(hx + R * 0.48, hc + R * 0.46); ctx.quadraticCurveTo(hx + R * 0.66, hc + R * 0.78, hx + R * 0.86, hc + R * 0.44); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = OL; ctx.lineWidth = 0.8; ctx.stroke();
+    } else {
+      ell(hx + R * 0.56, hc + R * 0.08, 0.9, 1.2, OL, 0);
+      ctx.fillStyle = 'rgba(255,120,130,.35)'; ctx.beginPath(); ctx.arc(hx + R * 0.32, hc + R * 0.42, 1.6, 0, 7); ctx.fill();
+      ctx.strokeStyle = OL; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(hx + R * 0.6, hc + R * 0.42, 1.3, 0.3, Math.PI - 0.5); ctx.stroke();
+    }
+    if (K.glasses) { ctx.fillStyle = 'rgba(210,235,255,.35)'; ctx.beginPath(); ctx.arc(hx + R * 0.58, hc + R * 0.05, R * 0.3, 0, 7); ctx.fill(); ctx.strokeStyle = '#c03a6a'; ctx.lineWidth = 1.1; ctx.stroke(); ctx.beginPath(); ctx.moveTo(hx + R * 0.28, hc); ctx.lineTo(hx - R * 0.1, hc - R * 0.04); ctx.stroke(); }
+    ctx.restore();
   }
 
   // ---------- Han: long dark hair with a side part, big smile, grey zip-up, white tee, baggy dark jeans ----------
   const HANP = { skin: '#f3d3b8', hair: '#2b1b15', hood: '#9ea1a8', hoodD: '#7d8088', jeans: '#2f3547', jeansD: '#1f2433', shoe: '#f7f4ee' };
-  function drawHan() { drawHanAt(han.x, han.y, han.face, han.goto ? 'walk' : han.pose, han.walkT, ball.held === 'han'); }
+  function drawHan() { drawHanAt(han.x, han.y - (han.jh || 0), han.face, han.goto ? 'walk' : han.pose, han.walkT, ball.held === 'han'); }
   function drawHanAt(x, y, f, pose, wt, holding) {
     const H = 84; let a = 'idle', i = 0, yy = y;
     if (pose === 'walk') { a = 'walk'; i = ((((wt || 0) / (Math.PI * 2)) * 6) % 6 + 6) % 6; }
@@ -1767,6 +1893,8 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     else if (pose === 'dig' || pose === 'bump') { a = 'bump'; i = 0; }
     else if (pose === 'set') { a = 'set'; i = 0; }
     else if (pose === 'toss') { a = 'toss'; i = 0; }
+    else if (pose === 'spikeUp') { a = 'spikeback'; i = 0; }
+    else if (pose === 'spikeHit') { a = 'spikehit'; i = 0; }
     else if (pose === 'hold') { a = 'hold'; i = 0; }
     else { [a, i] = CHARS.idle('han', time + 1.3); }
     const hd = CHARS.draw(ctx, 'han', a, i, x, yy, H, f, { t: time + 1.3 });
@@ -1943,7 +2071,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   function launch(x0, h0, tx, th, apex) {
     apex = Math.max(apex, h0 + 8, th + 8);
     const vh = Math.sqrt(2 * VG * (apex - h0)), T = vh / VG + Math.sqrt(2 * (apex - th) / VG);
-    ball.x = x0; ball.h = h0; ball.vh = vh; ball.vx = (tx - x0) / T; ball.held = null; ball.spike = false;
+    ball.x = x0; ball.h = h0; ball.vh = vh; ball.vx = (tx - x0) / T; ball.held = null; ball.spike = false; ball.hanSpike = false; ball.fromHan = false;
   }
   function predict(hT, maxT = 2.4) {
     let x = ball.x, h = ball.h, vx = ball.vx, vh = ball.vh; const d = 1 / 90;
@@ -1972,7 +2100,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     if (PEP.on) return;
     ensureAudio(); keys.l = keys.r = false; closeSheet();
     Object.assign(PEP, { on: true, phase: 'enter', t: 0, rally: 0, live: false, deadT: 0, bestAt: PEP.best });
-    Object.assign(rj, { vx: 0, jh: 0, jv: 0, spk: null, vp: null, armT: 0, slide: false, lean: 0 });
+    Object.assign(rj, { vx: 0, jh: 0, jv: 0, spk: null, vp: null, armT: 0, slide: false, lean: 0, dive: null });
     goTo(rj, HOME.rj, GY, 1.0);
     han.y = 334; goTo(han, HOME.han, GY - 3, 1.7); han.pose = 'walk';
     goTo(tilly, HOME.tilly, GY - 5, 1.3); tilly.pose = 'walk';
@@ -1983,16 +2111,25 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   function endPepper() {
     if (!PEP.on || PEP.phase === 'exit') return;
     PEP.phase = 'exit'; PEP.t = 0; PEP.live = false; keys.l = keys.r = false;
-    Object.assign(rj, { vx: 0, jh: 0, jv: 0, spk: null, vp: null, armT: 0, slide: false, lean: 0 });
+    Object.assign(rj, { vx: 0, jh: 0, jv: 0, spk: null, vp: null, armT: 0, slide: false, lean: 0, dive: null });
     if (ball.held !== 'tilly') { ball.fade = true; ball.held = ball.held === 'han' ? null : ball.held; ball.vx = 0; ball.vh = 0; }
     goTo(rj, clamp(rj.x, 2650, 2760), WALK, 0.8);
-    han.fetch = tilly.fetch = false; han.holdT = tilly.holdT = tilly.throwT = 0;
+    han.fetch = tilly.fetch = false; han.holdT = tilly.holdT = tilly.throwT = tilly.bumpT = 0; han.air = false; han.jh = 0; han.jv = 0;
     goTo(han, SEAT.han, 334, 1.6); goTo(tilly, SEAT.han - 15, 316, 1.35);
     pepUI(false);
   }
 
   // ---------- R.J. moves: walk, hold to sprint, slide when you let go at speed ----------
   function moveRJ(dt) {
+    if (rj.dive) {
+      const d = rj.dive; d.t += dt;
+      if (d.t < d.dur) { rj.vx = approach(rj.vx, 0, (d.t < 0.14 ? 120 : 520) * dt); if (d.t > 0.14 && Math.abs(rj.vx) > 40) { rj.dustT -= dt; if (rj.dustT <= 0) { rj.dustT = 0.03; dust.push({ x: rj.x + d.dir * rnd(10, 60), y: rj.y, vx: rj.vx * 0.3 + rnd(-15, 15), vy: rnd(-26, -8), t: 0, life: rnd(0.35, 0.6), r: rnd(2.5, 4.5) }); } } }
+      else rj.vx = 0;
+      if (d.t >= 0.14 && !d.landed) { d.landed = true; noise(0.18, 420, 0.08); tone(80, 0.08, 'sine', 0.07, -20); }
+      rj.x = clamp(rj.x + rj.vx * dt, 2490, Math.max(2500, han.x - 34)); rj.face = d.dir; rj.moving = false; rj.slide = false; rj.lean = 0;
+      if (d.t > d.dur + 0.3) { rj.dive = null; rj.face = 1; }
+      return;
+    }
     if (rj.goto) { stepGoto(rj, dt); rj.vx = 0; rj.lean = 0; rj.slide = false; if (!rj.goto && PEP.on) rj.face = 1; return; }
     const pep = PEP.on, busy = panelOpen() || (pep && PEP.phase !== 'play');
     const dir = busy ? 0 : (keys.r ? 1 : 0) - (keys.l ? 1 : 0);
@@ -2032,6 +2169,8 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
       if (rj.spk && !rj.spk.armed && rj.spk.sw === null) { rj.spk.armed = true; rj.spk.at = 0; }
       return;
     }
+    if (rj.dive) return;
+    if (Math.abs(rj.vx) > 200 && (keys.l || keys.r)) { startDive(); return; }   // pass at a sprint: you lay out
     if (rj.passCool > 0) return;
     rj.passCool = 0.3; rj.armT = 0.14;
     rj.vp = { k: ball.h > 66 && !ball.held ? 'set' : 'bump', t: 0, dur: 0.26 };
@@ -2063,13 +2202,36 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     if (q >= 0.25 && late) apex -= 25;
     launch(ball.x, h, tx, th, apex);
     ball.last = 'rj'; ball.toHan = ball.vx > 0; han.react = 0.1;
+    // a high, good ball that's coming to her: Han goes up and swings at it
+    const peak = ball.h + ball.vh * ball.vh / (2 * VG);
+    if (ball.toHan && q >= 0.5 && peak >= 150 && Math.abs(tx - han.x) < 70 && Math.random() < 0.8) { ball.hanSpike = true; han.spiked = false; }
     touched('rj');
     const word = q >= 0.85 ? 'PERFECT' : q >= 0.6 ? 'GOOD' : q >= 0.25 ? (early ? 'EARLY' : late ? 'LATE' : 'OK') : 'SHANK';
     pop(word, rj.x, rj.y - 92, QCOL(q)); pop(k.toUpperCase(), rj.x, rj.y - 106, '#f4ece0', true);
     if (q < 0.25) { hanSay(['Tilly, get it!', 'Where are you aiming?', 'Ay! Shank!']); if (Math.random() < 0.6) say('That’s so funny RJ!', SEAT.thea, 270, 1.8); }
   }
+  // the dive: a Superman lay-out along the road, one hand flat on the ground ahead for a pancake
+  function startDive() {
+    const dir = Math.sign(rj.vx) || 1;
+    rj.dive = { t: 0, dur: 0.62, dir, hit: false }; rj.face = dir; rj.vx = dir * Math.max(Math.abs(rj.vx), 360); rj.vp = null; rj.armT = 0;
+    noise(0.12, 900, 0.05);
+  }
+  const diveHand = () => rj.x + rj.dive.dir * 86;
+  function tryPancake() {
+    const d = rj.dive; if (!d || d.hit || d.t < 0.08 || d.t > d.dur + 0.12 || ball.held || ball.fade || !PEP.live) return;
+    const along = (ball.x - rj.x) * d.dir; if (along < 34 || along > 108 || ball.h > 40) return;   // anywhere along the outstretched arm
+    const hx = ball.x;
+    d.hit = true;
+    const pan = ball.h < 18, q = clamp(1 - Math.abs(along - 80) / 50, 0.3, 1);
+    launch(ball.x, Math.max(ball.h, BR + 1), lerp(rj.x + 40, han.x - 14, q), 44, 105 + 40 * q);
+    ball.last = 'rj'; ball.toHan = ball.vx > 0; han.react = 0.1;
+    sfx.bump(); touched('rj');
+    pop(pan ? 'PANCAKE!' : 'DIVE!', hx, GY - 46, '#ffd25c'); if (pan) PEP.shake = 0.12;
+    hanSay(pan ? ['PANCAKE! Okay!', 'No way, a pancake!', 'Justin, did you get that?!'] : ['What a dive!', 'Hustle!', 'Okay, hustle!']);
+    if (Math.random() < 0.6) { thea.cheer = 1.2; say(line('thea', ['What the chick-bok-bok!', 'Woooow!']), SEAT.thea, 270, 1.6); }
+  }
   function pepJump() {
-    if (!PEP.on || PEP.phase !== 'play' || panelOpen() || rj.jh > 0) return;
+    if (!PEP.on || PEP.phase !== 'play' || panelOpen() || rj.jh > 0 || rj.dive) return;
     rj.jv = 338; rj.jh = 0.01; rj.face = 1; rj.spk = { t: 0, hit: false, sw: null, armed: false, at: 0 }; rj.vp = null;
     sfx.jump();
     for (let i = 0; i < 6; i++) dust.push({ x: rj.x + rnd(-8, 8), y: rj.y, vx: rnd(-40, 40), vy: rnd(-20, -6), t: 0, life: rnd(0.3, 0.5), r: rnd(2, 3.5) });
@@ -2134,6 +2296,15 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     ball.last = 'han'; ball.toHan = false; han.face = -1;
     touched('han');
   }
+  function hanSpikeHit() {
+    han.spiked = true; han.pose = 'spikeHit'; han.poseT = 0.35;
+    const tx = rj.x + 16, sp = rnd(360, 450), dist = Math.max(60, ball.x - tx), T = dist / sp;
+    ball.vx = (tx - ball.x) / T; ball.vh = (40 - ball.h + 0.5 * VG * T * T) / T; ball.held = null; ball.spike = false; ball.hanSpike = false; ball.fromHan = true;
+    ball.last = 'han'; ball.toHan = false; han.face = -1; han.cool = 0.5;
+    sfx.spike(0.75); PEP.shake = 0.1; touched('han');
+    pop('HAN SPIKES!', han.x - 10, GY - 150, '#ff9ec4', true);
+    hanSay(['Dig this!', 'Incoming!', 'Your turn!', 'Hehe, sorry!', 'Wake up, RJ!'], 'hs', 1.2);
+  }
   function hanToss() {
     han.pose = 'toss'; han.poseT = 0.35;
     launch(han.x - 13, 40, rj.x + 16, 142, 200); ball.last = 'han'; ball.toHan = false;
@@ -2147,6 +2318,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   function onGround() {
     if (!PEP.live) return;
     PEP.live = false; ball.toHan = false; PEP.deadT = 0;
+    if (ball.fromHan) { pop('DROP', ball.x, GY - 40, '#ff7a6a'); hanSay(['Too fast?', 'Dig it next time!', 'Hehe. Point, Han.', 'Bend your knees!']); pepHudSync(); return; }
     if (ball.last === 'rj' && ball.spike && ball.x > han.x - 70) { pop('KILL!', ball.x, GY - 40, '#ffd25c'); hanSay(['Hey! Too hard!', 'Show-off.', 'Okay, Mr. Varsity.', 'Not in front of my cousins!']); thea.cheer = 1.2; say(line('thea', ['What the chick-bok-bok!', 'WHAT THE CHICK-BOK-BOK!']), SEAT.thea, 270, 1.8); }
     else if (ball.last === 'han' || ball.last === 'tilly') { pop('DROP', ball.x, GY - 40, '#ff7a6a'); hanSay(['Wake up!', 'That was a perfect set!', 'Hello? Ball?', 'Tilly sets better than that.']); }
     else { pop('DROP', ball.x, GY - 40, '#ff7a6a'); if (ball.x < rj.x - 40) hanSay(['Tilly, get it!', 'Behind you!']); else hanSay(['Short!', 'Ooh, almost.', 'Keep it up next time.']); }
@@ -2170,6 +2342,23 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   }
   function stepHan(dt) {
     han.cool -= dt; han.react -= dt; if (han.poseT > 0) han.poseT -= dt;
+    han.jh = han.jh || 0;
+    if (han.air) {
+      han.jv -= (han.jv > 0 ? 1100 : 1350) * dt; han.jh += han.jv * dt;
+      if (ball.hanSpike && !han.spiked && !ball.held) { if (han.poseT <= 0) han.pose = 'spikeUp'; const d = Math.hypot(ball.x - (han.x - 10), ball.h - (han.jh + 98)); if (d < 30) hanSpikeHit(); }
+      if (han.jh <= 0) { han.jh = 0; han.jv = 0; han.air = false; if (ball.hanSpike) ball.hanSpike = false; for (let i = 0; i < 4; i++) dust.push({ x: han.x + rnd(-8, 8), y: han.y, vx: rnd(-40, 40), vy: rnd(-14, -4), t: 0, life: rnd(0.25, 0.4), r: rnd(2, 3) }); }
+      return;
+    }
+    if (ball.hanSpike && !han.spiked && !ball.held) {
+      const p = predict(128);
+      if (!p || ball.h < 100 && ball.vh < 0) ball.hanSpike = false;
+      else {
+        han.vx = approach(han.vx, clamp((p.x + 10 - han.x) * 7, -250, 250), 1600 * dt); han.x += han.vx * dt; han.face = -1;
+        han.pose = Math.abs(han.vx) > 40 ? 'run' : 'ready'; han.walkT += Math.abs(han.vx) * dt * 0.1;
+        if (p.t < 0.29) { han.air = true; han.jv = 300; han.jh = 0.01; han.pose = 'spikeUp'; han.poseT = 0; sfx.jump(); }
+        return;
+      }
+    }
     if (han.holdT > 0) { han.holdT -= dt; han.pose = 'hold'; han.face = -1; if (han.holdT <= 0) hanToss(); return; }
     let goal = HOME.han;
     if (han.fetch && !ball.held) goal = ball.x + 14;
@@ -2184,8 +2373,18 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     if (han.fetch && !ball.held && Math.abs(han.x - ball.x) < 24 && ball.h < 20) { han.fetch = false; ball.held = 'han'; ball.vx = ball.vh = 0; han.holdT = 0.55; }
     if (ball.toHan && !ball.held && han.cool <= 0 && han.react <= 0) { const dx = han.x - ball.x; if (dx > -8 && dx < 38 && ball.h > 8 && ball.h < 104) hanHit(); }
   }
+  // no catch, no toss: she just sticks her arms out and the ball goes... somewhere
+  function tillyBump() {
+    const toHan = Math.random() < 0.25, wild = Math.random() < 0.22;
+    if (toHan) launch(ball.x, ball.h, han.x - 14, 44, 170 + rnd(-10, 20));
+    else launch(ball.x, ball.h, wild ? rj.x + rnd(-70, 60) : rj.x + 14, wild ? 20 : 40, wild ? rnd(80, 190) : 128);
+    ball.last = 'tilly'; ball.toHan = toHan; tilly.cool = 0.8; tilly.bumpT = 0.4; tilly.vx = 0; sfx.bump(); touched('tilly');
+    pop(wild ? 'TILLY…?' : 'TILLY PASS!', tilly.x, GY - 52, '#ff9ec4', true);
+    if (Math.random() < 0.7) say(line('tilly', ['Ball!', 'Ball!!', 'BALL!', 'Bump!', 'Ball! Ball!']), tilly.x, GY - 40, 1.1, () => [tilly.x, tilly.y - 42]);
+  }
   function stepTilly(dt) {
     tilly.cool -= dt;
+    if (tilly.bumpT > 0) { tilly.bumpT -= dt; tilly.pose = 'idle'; tilly.face = 1; return; }
     if (tilly.holdT > 0) { tilly.holdT -= dt; tilly.pose = 'hold'; tilly.face = 1; tilly.vx = 0; if (tilly.holdT <= 0) { tilly.throwT = 0.32; tilly.pose = 'throw'; } return; }
     if (tilly.throwT > 0) { const b4 = tilly.throwT; tilly.throwT -= dt; if (b4 > 0.16 && tilly.throwT <= 0.16) tillyThrow(); if (tilly.throwT <= 0) tilly.pose = 'idle'; return; }
     let goal = HOME.tilly;
@@ -2198,6 +2397,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     tilly.face = tilly.vx < -18 ? -1 : 1;
     if (!ball.held && !ball.fade && tilly.cool <= 0 && Math.abs(ball.x - tilly.x) < 14 && ball.h < 30) {
       const save = PEP.live && ball.last !== 'tilly';
+      if (PEP.live && ball.h > 9 && Math.random() < 0.4) { tillyBump(); return; }
       ball.held = 'tilly'; ball.vx = ball.vh = 0; tilly.fetch = false; tilly.holdT = 0.6;
       if (save) pop('TILLY SAVE!', tilly.x, GY - 52, '#ff9ec4', true);
       if (Math.random() < 0.6) say(line('tilly', ['Ball!', 'Ball!!', 'BALL!', 'Ball! Ball!', 'Ball?']), tilly.x, GY - 40, 1.1, () => [tilly.x, tilly.y - 36]);
@@ -2219,6 +2419,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     }
     rj.passCool -= dt;
     if (rj.armT > 0) { rj.armT -= dt; tryPass(); }
+    tryPancake();
     if (rj.vp) { rj.vp.t += dt; if (rj.vp.t > rj.vp.dur) rj.vp = null; }
     if (rj.jh > 0) {
       rj.jv -= (rj.jv > 0 ? 1100 : 1350) * dt; rj.jh += rj.jv * dt;
@@ -2258,7 +2459,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     items.push({ y: han.y, fn: drawHan });
     const tp = tilly.goto ? 'walk' : tilly.pose;
     items.push({ y: tilly.y, fn: () => drawTot(tilly.x, tilly.y, { ...TILLY, shadow: true, face: tilly.face, ph: 0.7,
-      pose: tp === 'idle' || tp === 'hold' ? 'stand' : tp, flap: tp === 'idle', ball: ball.held === 'tilly' && tp !== 'throw', withBall: ball.held === 'tilly',
+      pose: tp === 'idle' || tp === 'hold' ? 'stand' : tp, flap: tp === 'idle' && !(tilly.bumpT > 0), bump: tilly.bumpT > 0, ball: ball.held === 'tilly' && tp !== 'throw', withBall: ball.held === 'tilly',
       k: tilly.throwT > 0 ? 1 - tilly.throwT / 0.32 : 0 }) });
     if (!ball.held) items.push({ y: GY + 3, fn: () => {
       const s = 1 - Math.min(ball.h, 220) / 300;
@@ -2874,9 +3075,18 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 
   // ---------- blackjack with the tropa: an animated table ----------
   const SUITS = ['♠', '♥', '♦', '♣'], RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  // A real 4-deck shoe: every card comes out of it in order, nothing is generated on the fly. R.J.'s cut sets where it
+  // starts; Kuya Jun's blue cut card sits about halfway, and when it comes out the shoe gets washed and shuffled.
+  const DECKS = 4;
   let shoe = [];
-  function newShoe() { shoe = []; for (let n = 0; n < 2; n++) for (const s of SUITS) for (const r of RANKS) shoe.push({ r, s }); for (let i = shoe.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shoe[i], shoe[j]] = [shoe[j], shoe[i]]; } }
-  function draw1() { if (shoe.length < 15) newShoe(); return shoe.pop(); }
+  const hilo = (c) => { const r = c.r; return '23456'.includes(r) ? 1 : (r === 'A' || r === 'K' || r === 'Q' || r === 'J' || r === '10') ? -1 : 0; };
+  function newShoe() {
+    shoe = []; for (let n = 0; n < DECKS; n++) for (const s of SUITS) for (const r of RANKS) shoe.push({ r, s });
+    for (let i = shoe.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shoe[i], shoe[j]] = [shoe[j], shoe[i]]; }
+    T.rc = 0; T.cutOut = false; T.discard = 0;
+    T.shoeN = shoe.length; T.cutAt = Math.round(shoe.length * (0.45 + Math.random() * 0.1));   // cards left behind the cut card: about half the shoe
+  }
+  function draw1() { if (!shoe.length) newShoe(); return shoe.pop(); }
   function handVal(h) { let v = 0, a = 0; for (const cd of h) { const r = cd.c.r; if (r === 'A') { v += 11; a++; } else if ('JQK'.includes(r) || r === '10') v += 10; else v += +r; } while (v > 21 && a) { v -= 10; a--; } return v; }
   const isBJ = (h) => h.length === 2 && handVal(h) === 21;
 
@@ -2921,8 +3131,16 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   const RL = mkHand({ x: 228, y: 536, rot: -0.3, side: -1, anchor: { x: 110, y: 700 } });
   const home = (h, d = 0.3) => tween(h, { x: h.home.x, y: h.home.y, rot: h.home.rot, sc: 1 }, d);
 
-  let T = { state: 'bet', bet: 0, hands: [], hi: 0, ins: 0, cards: [], p: [], d: [], z: 1, msg: '', msgT: 0, discard: 0, holeShown: false, palm: false, doubled: false, chirp: '', chirpT: 0, chirpMax: 1 };
-  const vis = { cup: 0, circle: 0, ins: 0 };
+  let T = { state: 'bet', bet: 0, hands: [], hi: 0, ins: 0, cards: [], p: [], d: [], z: 1, msg: '', msgT: 0, discard: 0, holeShown: false, palm: false, doubled: false, chirp: '', chirpT: 0, chirpMax: 1,
+    fresh: true, everDealt: false, pp: 0, rc: 0, cutAt: 0, cutOut: false, dstyle: 'classic', fumble: false, closedAt: 0 };
+  const vis = { cup: 0, circle: 0, ins: 0, pp: 0 };
+  // the Perfect Pairs spot, left of the main circle
+  const PPS = () => ({ x: CIRCLE.x - 94, y: CIRCLE.y - 46, r: 22 });
+  let cutShow = null, dealerCut = null, wash = null, scubaFx = [];
+  // the count doodles live in open felt: the heart under the palanggana, the card doodle beside the shoe
+  const countSpots = () => narrowT
+    ? { h: { x: TRAY.x + 14, y: TRAY.y + 104 }, c: { x: SHOE.x + 2, y: SHOE.y + 122 } }
+    : { h: { x: TRAY.x + 96, y: TRAY.y + 88 }, c: { x: SHOE.x - 104, y: SHOE.y + 66 } };
 
   // ---------- the other two seats: regulars who come and go ----------
   const CAST = [
@@ -2948,7 +3166,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   function stepFlyers(dt) {
     for (const f of flyers) { f.t += dt; if (f.t < 0) continue; const k = Math.min(1, f.t / f.dur), e = eOut(k); f.x = lerp(f.fx, f.tx, e); f.y = lerp(f.fy, f.ty, e) - Math.sin(k * Math.PI) * 40; if (k >= 1 && !f.done) { f.done = true; f.onArrive && f.onArrive(); sndClink(); } }
     flyers = flyers.filter(f => !f.done);
-    if (!flyers.length) { const gone = (T.hands || []).reduce((a, hh) => a + (hh.swept ? hh.bet : 0), 0); vis.cup = fishballs; vis.circle = T.bet - gone; vis.ins = T.ins || 0; for (const hh of (T.hands || [])) hh.shown = hh.swept ? 0 : hh.bet; }
+    if (!flyers.length) { const gone = (T.hands || []).reduce((a, hh) => a + (hh.swept ? hh.bet : 0), 0); vis.cup = fishballs; vis.circle = T.bet - gone; vis.ins = T.ins || 0; vis.pp = T.pp || 0; for (const hh of (T.hands || [])) hh.shown = hh.swept ? 0 : hh.bet; }
   }
 
   // ---------- drawing the table ----------
@@ -3165,7 +3383,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     doodle(ox + vw * 0.12, vh * 0.42, 0.08, '#fff7e0', () => { for (let k = 1; k < 3; k++) { ctx.beginPath(); ctx.moveTo(k * 14, 0); ctx.lineTo(k * 14, 42); ctx.moveTo(0, k * 14); ctx.lineTo(42, k * 14); ctx.stroke(); } ctx.font = `14px ${MARK}`; ctx.fillText('X', 7, 12); ctx.fillText('O', 21, 26); ctx.fillText('X', 35, 40); ctx.fillText('O', 35, 12); ctx.beginPath(); ctx.moveTo(2, 4); ctx.lineTo(40, 40); ctx.stroke(); });
     doodle(ox + vw * 0.86, vh * 0.5, -0.12, '#ff9fb8', () => { ctx.beginPath(); ctx.moveTo(0, 8); ctx.bezierCurveTo(-18, -6, -10, -20, 0, -10); ctx.bezierCurveTo(10, -20, 18, -6, 0, 8); ctx.stroke(); ctx.font = `13px ${MARK}`; ctx.fillText('J + M', 0, 26); });
     doodle(ox + vw * 0.83, vh * 0.68, 0.1, '#ffe27a', () => { ctx.font = `15px ${MARK}`; ctx.fillText('RJ WAS HERE', 0, 0); });
-    doodle(ox + vw * 0.2, vh * 0.27, -0.06, '#fff7e0', () => { ctx.lineWidth = 1.8; for (let k = 0; k < 2; k++) { for (let m = 0; m < 4; m++) { ctx.beginPath(); ctx.moveTo(k * 30 + m * 5, 0); ctx.lineTo(k * 30 + m * 5 + 1, 18); ctx.stroke(); } ctx.beginPath(); ctx.moveTo(k * 30 - 3, 14); ctx.lineTo(k * 30 + 19, 4); ctx.stroke(); } ctx.font = `11px ${MARK}`; ctx.fillText('Jun', 26, 34); });
+    // (the old tally marks are gone: the count heart lives there now)
     doodle(ox + vw * 0.68, vh * 0.33, 0.05, '#ffffff', () => { ctx.font = `14px ${MARK}`; ctx.fillText('BAWAL UTANG!', 0, 0); ctx.beginPath(); ctx.moveTo(-50, 6); ctx.lineTo(50, 4); ctx.stroke(); });
     doodle(ox + vw * 0.14, vh * 0.7, 0.2, '#9fe0ff', () => { ctx.beginPath(); ctx.arc(0, 0, 13, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.arc(-4, -3, 1.6, 0, 7); ctx.arc(4, -3, 1.6, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(0, 2, 7, 0.2, Math.PI - 0.2); ctx.stroke(); });
     ctx.restore();
@@ -3187,15 +3405,41 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     if (felt.width !== W || felt.height !== H) { felt.width = W; felt.height = H; }
     ctx = fctx; ctx.setTransform(W / VW(), 0, 0, H / VH, -OX() * W / VW(), 0);
     drawStreetTable();
+    // the running count picks a card up the first time anybody at the table could see it
     // a hand-drawn betting circle
     ctx.save(); ctx.strokeStyle = 'rgba(255,246,220,.8)'; ctx.lineWidth = 3; ctx.beginPath();
     for (let i = 0; i <= 40; i++) { const a = i / 40 * Math.PI * 2 + 0.2, rr2 = CIRCLE.r + Math.sin(i * 1.7) * 1.8; ctx.lineTo(CIRCLE.x + Math.cos(a) * rr2, CIRCLE.y + Math.sin(a) * rr2); }
     ctx.stroke(); ctx.fillStyle = 'rgba(255,246,220,.6)'; ctx.font = `15px ${MARK}`; ctx.textAlign = 'center'; ctx.fillText('taya dito', CIRCLE.x - 4, CIRCLE.y + CIRCLE.r + 20); ctx.restore();
     // the deck lives in a beat-up cardboard box, discards go in a plastic palanggana, the bank is an enamel plate
-    ctx.save(); ctx.translate(SHOE.x, SHOE.y); ctx.rotate(-0.5); rr(-42, -56, 84, 112, 4, '#c49a6c', 2); ctx.fillStyle = 'rgba(90,60,30,.25)'; ctx.fillRect(-42, -10, 84, 4); rr(-32, -46, 64, 80, 3, '#1e3f8f', 1.4);
+    ctx.save(); ctx.translate(SHOE.x, SHOE.y); ctx.rotate(-0.5); rr(-42, -56, 84, 112, 4, '#c49a6c', 2); ctx.fillStyle = 'rgba(90,60,30,.25)'; ctx.fillRect(-42, -10, 84, 4);
+    rr(-32, -46, 64, 80, 3, '#4a2e18', 1.4);   // the empty bottom of the box
+    { const tot = T.shoeN || DECKS * 52, f = T.shoeOut ? 0 : (T.everDealt || shoe.length ? clamp(shoe.length / tot, 0, 1) : 1), h = 78 * f;
+      if (h > 0.5) {
+        ctx.fillStyle = '#1e3f8f'; ctx.beginPath(); ctx.roundRect(-31, 33 - h, 62, h, 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(160,190,255,.45)'; ctx.lineWidth = 1; for (let yy = 33 - h + 3; yy < 32; yy += 3.2) { ctx.beginPath(); ctx.moveTo(-29, yy); ctx.lineTo(29, yy); ctx.stroke(); }   // card edges
+        ctx.fillStyle = '#2f5fc4'; ctx.fillRect(-31, 33 - h, 62, 2.4);   // the top card
+      }
+      // the edge of Kuya Jun's blue cut card, still buried in the stack
+      if (T.cutAt && !T.cutOut && !dealerCut && !T.shoeOut) { const y = 33 - 78 * clamp(T.cutAt / tot, 0, 1); rr(-38, y - 3, 76, 5, 1, '#5fc8ff', 1.2); }
+    }
     rr(-44, 30, 88, 16, 1, 'rgba(200,190,150,.9)', 1); ctx.fillStyle = '#2b2b33'; ctx.font = `12px ${MARK}`; ctx.textAlign = 'center'; ctx.fillText('CARDS', 0, 43); ctx.restore();
     ctx.save(); ctx.translate(TRAY.x, TRAY.y); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(4, 6, 58, 46, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#d6332a'; ctx.beginPath(); ctx.ellipse(0, 0, 58, 46, 0, 0, 7); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = OL; ctx.stroke(); ctx.fillStyle = '#a82020'; ctx.beginPath(); ctx.ellipse(0, 2, 46, 35, 0, 0, 7); ctx.fill();
-    ctx.rotate(0.4); for (let i = 0; i < Math.min(14, Math.ceil(T.discard / 3)); i++) rr(-29, -41 - i * 1.6, 58, 82, 6, '#1e3f8f', 1.2); ctx.restore();
+    ctx.rotate(0.4); for (let i = 0; i < Math.min(18, Math.ceil(T.discard / 8)); i++) rr(-29, -41 - i * 1.6, 58, 82, 6, '#1e3f8f', 1.2); ctx.restore();
+    // somebody's been keeping count on the felt: the running count drawn in a heart like a crush's initials,
+    // the true count as a little doodled card (T in the corner, the value in the other)
+    if (T.everDealt || T.rc) {
+      const left = Math.max(0.5, shoe.length / 52), tc = Math.trunc(T.rc / left), sg = (v) => (v < 0 ? ' − ' : ' + ') + Math.abs(v);
+      const hp = countSpots();
+      ctx.save(); ctx.translate(hp.h.x, hp.h.y); ctx.rotate(-0.08); ctx.globalAlpha = 0.62; ctx.strokeStyle = '#ff9fb8'; ctx.fillStyle = '#ff9fb8'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0, 24); ctx.bezierCurveTo(-50, -4, -30, -44, 0, -20); ctx.bezierCurveTo(30, -44, 50, -4, 0, 24); ctx.stroke();
+      ctx.font = `15px ${MARK}`; ctx.textAlign = 'center'; ctx.fillText('R' + sg(T.rc), 0, 2); ctx.restore();
+      ctx.save(); ctx.translate(hp.c.x, hp.c.y); ctx.rotate(0.1); ctx.globalAlpha = 0.62; ctx.strokeStyle = '#f6ecd2'; ctx.fillStyle = '#f6ecd2'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.roundRect(-19, -26, 38, 52, 5); ctx.stroke();
+      ctx.font = `13px ${MARK}`; ctx.textAlign = 'left'; ctx.fillText('T', -15, -11);
+      ctx.textAlign = 'right'; ctx.fillText((tc > 0 ? '+' : '') + tc, 16, 22);
+      ctx.save(); ctx.translate(0, 1); ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(0, -11); ctx.bezierCurveTo(4, -5, 10, -2, 9, 3); ctx.bezierCurveTo(8, 7.5, 3, 7.5, 1, 4.5); ctx.lineTo(3.5, 10); ctx.lineTo(-3.5, 10); ctx.lineTo(-1, 4.5); ctx.bezierCurveTo(-3, 7.5, -8, 7.5, -9, 3); ctx.bezierCurveTo(-10, -2, -4, -5, 0, -11); ctx.closePath();
+      ctx.globalAlpha = 0.22; ctx.fill(); ctx.globalAlpha = 0.62; ctx.lineWidth = 1.8; ctx.stroke(); ctx.restore(); ctx.restore();
+    }
     ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(BANK.x + 4, BANK.y + 4, 74, 26, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#f4f4ee'; ctx.beginPath(); ctx.ellipse(BANK.x, BANK.y, 74, 26, 0, 0, 7); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#2f6fd6'; ctx.stroke(); ctx.lineWidth = 1.4; ctx.strokeStyle = OL; ctx.beginPath(); ctx.ellipse(BANK.x, BANK.y, 76, 28, 0, 0, 7); ctx.stroke(); ctx.fillStyle = 'rgba(40,40,60,.35)'; ctx.beginPath(); ctx.arc(BANK.x + 52, BANK.y + 8, 4, 0, 7); ctx.fill(); ctx.restore();
     drawBalls(26, BANK.x, BANK.y - 2, 4);
     // fishball cup
@@ -3211,6 +3455,17 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     // fishballs bet on the circle
     // insurance line
     { const ip = INS(); ctx.save(); ctx.globalAlpha = T.state === 'ins' ? 0.9 : 0.4; ctx.strokeStyle = '#fff6dc'; ctx.setLineDash([5, 5]); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ip.x, ip.y, 26, 0, 7); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#fff6dc'; ctx.font = `12px ${MARK}`; ctx.textAlign = 'center'; ctx.fillText('insurance 2:1', ip.x, ip.y - 34); ctx.restore(); if (vis.ins > 0) drawBalls(vis.ins, ip.x, ip.y, 3.4); }
+    // Perfect Pairs: a little chalk circle with the paytable over it
+    { const P = PPS(), on = T.state === 'bet'; ctx.save(); ctx.globalAlpha = on ? 0.85 : 0.5; ctx.strokeStyle = '#ffd25c'; ctx.lineWidth = 2.4; ctx.beginPath();
+      for (let i = 0; i <= 30; i++) { const a = i / 30 * Math.PI * 2 + 0.4, r2 = P.r + Math.sin(i * 2.3) * 1.2; ctx.lineTo(P.x + Math.cos(a) * r2, P.y + Math.sin(a) * r2); } ctx.stroke();
+      ctx.fillStyle = '#ffe9a6'; ctx.textAlign = 'center';
+      if (!vis.pp) { ctx.font = `15px ${MARK}`; ctx.fillText('PP', P.x, P.y + 6); }
+      ctx.font = `11px ${MARK}`; ctx.fillText('pairs 25 · 12 · 6', P.x - 2, P.y + P.r + 15);
+      if (on && !T.pp && fishballs > 0) { ctx.globalAlpha = 0.25 + 0.2 * Math.sin(time * 3); ctx.beginPath(); ctx.arc(P.x, P.y, P.r + 6, 0, 7); ctx.stroke(); }
+      ctx.restore();
+      if (vis.pp > 0) { drawBalls(vis.pp, P.x, P.y - 1, 3.2); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.beginPath(); ctx.roundRect(P.x - P.r - 34, P.y - 9, 28, 18, 9); ctx.fill(); ctx.fillStyle = '#ffd25c'; ctx.font = `700 11px ${UIF}`; ctx.textAlign = 'center'; ctx.fillText(String(vis.pp), P.x - P.r - 20, P.y + 4); }
+      if (on && T.pp) { const cx = P.x + P.r + 4, cy = P.y - P.r + 2; circ(cx, cy, 10, '#d6332a', 1.5); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(cx - 4, cy - 4); ctx.lineTo(cx + 4, cy + 4); ctx.moveTo(cx + 4, cy - 4); ctx.lineTo(cx - 4, cy + 4); ctx.stroke(); }
+    }
     if (T.hands.length > 1) {
       T.hands.forEach((hh, i) => { const pp = pileAt(i), n = hh.shown !== undefined ? hh.shown : hh.bet; drawBalls(n, pp.x, pp.y, 3.4); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.roundRect(pp.x + 18, pp.y - 30, 30, 18, 9); ctx.fill(); ctx.fillStyle = '#ffd25c'; ctx.font = `700 11px ${UIF}`; ctx.textAlign = 'center'; ctx.fillText(String(hh.bet), pp.x + 33, pp.y - 17); });
     } else drawBalls(vis.circle, CIRCLE.x, CIRCLE.y - 2, 5.4);
@@ -3226,6 +3481,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     [...T.cards].sort((a, b) => a.z - b.z).forEach(drawCardT);
     if (T.state === 'cut' && T.ribbon) { const R = T.ribbon, f = T.cutHover; if (f !== null && f !== undefined) drawCutCard(R.x0 + f * R.L, R.y + 34, 0.55); else { ctx.save(); ctx.globalAlpha = 0.5 + 0.4 * Math.sin(time * 4); ctx.strokeStyle = '#ffd25c'; ctx.lineWidth = 3; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.roundRect(R.x0 - 40, R.y - 52, R.L + 80, 104, 14); ctx.stroke(); ctx.restore(); } }
     if (cutCard) drawCutCard(cutCard.x, cutCard.y, cutCard.a);
+    for (const y of [dealerCut, cutShow]) if (y) drawCutCard(y.x, y.y, y.a, y.rot, y.sc, true);
     for (const d of dice) drawDie(d);
     if (diceSum && dice.length === 2) { const bx = (dice[0].x + dice[1].x) / 2, byy = Math.max(dice[0].y, dice[1].y) + 40; ctx.font = `20px ${DISPLAY}`; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = OL; ctx.strokeText(String(diceSum), bx, byy); ctx.fillStyle = '#ffd25c'; ctx.fillText(String(diceSum), bx, byy); }
     // totals: a card only counts once it has landed face-up and settled, so the badge never spoils a card mid-flip
@@ -3246,6 +3502,8 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     // hands on top
     for (const s of SEATS) if (s.npc || s.busy) { drawHandT(s.A); drawHandT(s.B); }
     drawHandT(DL); drawHandT(DR); drawHandT(RL); drawHandT(RR);
+    // scuba scubaFx
+    for (const b of scubaFx) { ctx.save(); ctx.globalAlpha = clamp(b.life * 2, 0, 0.85); ctx.strokeStyle = '#bfe8ff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.arc(b.x - b.r * 0.35, b.y - b.r * 0.35, b.r * 0.25, 0, 7); ctx.fill(); ctx.restore(); }
     // name tags and what the regulars are saying
     for (const s of SEATS) {
       if (!s.npc) continue;
@@ -3313,19 +3571,41 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   async function rjReach() { if (nudgeBusy) return; nudgeBusy = true; RL.pose = 'pinch'; await tween(RL, { x: CUP.x + 48, y: CUP.y + 24, rot: -0.5 }, 0.12); RL.pose = 'flat'; await home(RL, 0.16); nudgeBusy = false; }
 
   // ---------- dealing ----------
+  // Kuya Jun deals with some personality: 'classic', a 'flick' that spins the card across the felt,
+  // 'smooth' (quick, the card turns over in flight), or 'facedown' (everything down first, then flipped up together)
   async function dealCard(to, faceUp) {
+    if (T.everDealt && !T.cutOut && T.cutAt && shoe.length <= T.cutAt) await cutCardOut();
     const cd = { c: draw1(), x: SHOE.x - 4, y: SHOE.y + 10, rot: -0.5, sx: 1, sc: 1, face: false, z: T.z++ };
-    const seat = typeof to === 'object' ? to : null, quick = !!seat;
+    const seat = typeof to === 'object' ? to : null, quick = !!seat, st0 = T.dstyle || 'classic', st = to === 'hole' && !['classic', 'smooth', 'pass'].includes(st0) ? 'pass' : st0, k = st === 'smooth' ? 0.74 : 1, q = quick ? 0.72 : 1;
     DR.pose = 'pinch';
-    await tween(DR, { x: SHOE.x - 20, y: SHOE.y - 10, rot: Math.PI - 0.5 }, quick ? 0.11 : 0.2);
+    await tween(DR, { x: SHOE.x - 20, y: SHOE.y - 10, rot: Math.PI - 0.5 }, (quick ? 0.11 : 0.2) * k);
     T.cards.push(cd); sndSlide();
     let dest, rot = 0;
     if (seat) { dest = seatSlot(seat, seat.cards.length); rot = seat.doubled ? Math.PI / 2 - 0.08 : -0.08 - seat.side * 0.06; cd.k = seat.k; seat.cards.push(cd); }
     else if (to === 'p') { const hh = cur(); dest = slot(T.hi, hh.cards.length); rot = hh.doubled ? Math.PI / 2 - 0.08 : -0.08; hh.cards.push(cd); }
     else if (to === 'hole') { dest = { x: D0.x + 76, y: D0.y + 6 }; T.d.push(cd); }
     else { dest = T.d.length < 2 ? D0 : dSlot(T.d.length); T.d.push(cd); }
-    await Promise.all([tween(cd, { x: dest.x, y: dest.y, rot }, quick ? 0.2 : 0.3, eOut), tween(DR, { x: dest.x + 8, y: dest.y - 62, rot: Math.PI - 0.08 }, quick ? 0.2 : 0.3, eOut)]);
-    if (faceUp) await flip(cd, true, quick);
+    const dur = quick ? 0.2 : 0.3;
+    if (DEALS[st]) await DEALS[st](cd, dest, rot, faceUp, q);
+    else if (st === 'flick' && to !== 'hole') {
+      // a snap of the wrist by the shoe; the card spins across on its own and skids to a stop
+      const dir = Math.random() < 0.5 ? 1 : -1, hx = lerp(SHOE.x, dest.x, 0.28), hy = lerp(SHOE.y, dest.y, 0.28) - 24;
+      noise(0.07, 5200, 0.05);
+      await Promise.all([
+        tween(cd, { x: dest.x, y: dest.y, rot: rot + dir * Math.PI * 2 }, dur * 1.12, eOut),
+        (async () => { await tween(cd, { sc: 1.16 }, dur * 0.42); await tween(cd, { sc: 1 }, dur * 0.62, eOut); })(),
+        (async () => { await tween(DR, { x: hx, y: hy, rot: Math.PI - 0.5 + dir * 0.55 }, dur * 0.34, eOut); await tween(DR, { rot: Math.PI - 0.1 - dir * 0.2 }, dur * 0.5); })()]);
+      cd.rot = rot; noise(0.05, 900, 0.05);
+      if (faceUp) await flip(cd, true, true);
+    } else if (st === 'smooth') {
+      const fl = faceUp ? wait(dur * k * 0.4).then(() => flip(cd, true, true)) : null;
+      await Promise.all([tween(cd, { x: dest.x, y: dest.y, rot }, dur * k, eIO), tween(DR, { x: dest.x + 8, y: dest.y - 62, rot: Math.PI - 0.08 }, dur * k, eIO)]);
+      if (fl) await fl;
+    } else {
+      await Promise.all([tween(cd, { x: dest.x, y: dest.y, rot }, dur, eOut), tween(DR, { x: dest.x + 8, y: dest.y - 62, rot: Math.PI - 0.08 }, dur, eOut)]);
+      if (faceUp) await flip(cd, true, quick);
+    }
+    if (to === 'hole' && T.fumble) { T.fumble = false; await fumbleHole(cd); }
     if (to === 'hole') {   // slide it under the up-card
       cd.z = T.d[0].z - 1; DR.pose = 'flat';
       await Promise.all([tween(cd, { x: HOLE.x, y: HOLE.y, rot: 0.05 }, 0.26), tween(DR, { x: HOLE.x + 52, y: HOLE.y - 30, rot: Math.PI + 0.35 }, 0.26)]);
@@ -3333,6 +3613,225 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     }
     DR.pose = 'flat'; home(DR, 0.3);
     return cd;
+  }
+  // ---------- dealing styles ----------
+  // Mostly the real thing: the shoe hand pulls the card and hands it off; the other hand delivers it and turns it over as it lands.
+  // A non-pass style never comes twice in a row, and the pass only repeats now and then.
+  const STYLES = ['classic', 'flick', 'smooth', 'facedown', 'pitch', 'curve', 'cartwheel', 'tap'];
+  function pickStyle() {
+    if (T.forceStyle) return T.forceStyle;   // (test hook)
+    const last = T.lastStyle, pPass = last === 'pass' ? 0.25 : 0.6;
+    if (Math.random() < pPass) return 'pass';
+    const pool = STYLES.filter(x => x !== last); return pool[Math.floor(Math.random() * pool.length)];
+  }
+  const DEALS = {
+    // left hand pulls, passes across to the right; the right hand sets it and flips it in one move
+    async pass(cd, dest, rot, faceUp, q) {
+      const H = { x: lerp(SHOE.x, 400, 0.62), y: D0.y - 46 };
+      DL.pose = 'pinch';
+      await Promise.all([tween(cd, { x: H.x + 8, y: H.y + 16, rot: -0.12 }, 0.17 * q), tween(DR, { x: H.x + 26, y: H.y - 26, rot: Math.PI - 0.35 }, 0.17 * q), tween(DL, { x: H.x - 12, y: H.y - 24, rot: Math.PI + 0.35 }, 0.17 * q)]);
+      sndSlide(); DR.pose = 'flat'; home(DR, 0.32);
+      const tr = 0.27 * q, fl = faceUp ? wait(tr * 0.55).then(() => flip(cd, true, true)) : null;
+      await Promise.all([tween(cd, { x: dest.x, y: dest.y, rot }, tr, eOut), tween(DL, { x: dest.x - 4, y: dest.y - 58, rot: Math.PI + 0.06 }, tr, eOut)]);
+      if (fl) await fl;
+      DL.pose = 'flat'; home(DL, 0.3);
+    },
+    // an underhand lob: the card floats up big, turns slowly in the air, lands and skids a touch
+    async pitch(cd, dest, rot, faceUp, q) {
+      DR.pose = 'flat'; noise(0.06, 3000, 0.04);
+      const d = 0.38 * q, ov = { x: dest.x + (dest.x - SHOE.x) * 0.04, y: dest.y + 6 };
+      tween(DR, { x: SHOE.x - 50, y: SHOE.y + 10, rot: Math.PI - 0.15 }, 0.16 * q).then(() => tween(DR, { y: SHOE.y - 20 }, 0.12));
+      await Promise.all([tween(cd, { x: ov.x, y: ov.y, rot: rot + Math.PI * 0.9 }, d, (t) => 1 - Math.pow(1 - t, 2)), (async () => { await tween(cd, { sc: 1.42 }, d * 0.45, eOut); await tween(cd, { sc: 1 }, d * 0.55, (t) => t * t); })()]);
+      noise(0.05, 700, 0.05);
+      await tween(cd, { x: dest.x, y: dest.y, rot }, 0.1, eOut);
+      if (faceUp) await flip(cd, true, true);
+    },
+    // a curveball: the card bends out wide on the way and swings back in
+    async curve(cd, dest, rot, faceUp, q) {
+      const sx = cd.x, sy = cd.y, bend = (dest.x < 400 ? -1 : 1) * 150, cx = (sx + dest.x) / 2 + bend, cy = Math.max(sy, dest.y) + 40, r0 = cd.rot;
+      const pr = { _u: 0, get u() { return this._u; }, set u(v) { this._u = v; const a = (1 - v) * (1 - v), b2 = 2 * v * (1 - v), c = v * v; cd.x = a * sx + b2 * cx + c * dest.x; cd.y = a * sy + b2 * cy + c * dest.y; cd.rot = lerp(r0, rot + Math.PI * 2 * Math.sign(bend), v); } };
+      DR.pose = 'flat'; noise(0.08, 4200, 0.04);
+      await Promise.all([tween(pr, { u: 1 }, 0.4 * q, eOut), tween(DR, { x: SHOE.x - 70, y: SHOE.y - 4, rot: Math.PI - 0.6 * Math.sign(bend) }, 0.2 * q)]);
+      cd.rot = rot;
+      if (faceUp) await flip(cd, true, true);
+    },
+    // the card tumbles end over end across the felt and lands face-up
+    async cartwheel(cd, dest, rot, faceUp, q) {
+      DR.pose = 'flat'; tween(DR, { x: lerp(SHOE.x, dest.x, 0.25), y: SHOE.y - 6, rot: Math.PI - 0.2 }, 0.16 * q);
+      const flips = faceUp ? 5 : 4, d = 0.42 * q;
+      const roll = (async () => { for (let i = 0; i < flips; i++) { await tween(cd, { sx: 0 }, d / flips / 2.44); cd.face = !cd.face; if (i % 2) sndFlip(); await tween(cd, { sx: 1 }, d / flips / 2.44); } })();
+      await Promise.all([tween(cd, { x: dest.x, y: dest.y, rot }, d, eOut), roll]);
+      cd.face = !!faceUp; cd.sx = 1; if (faceUp) settle(cd, 0.25);
+    },
+    // slid out face-down under two fingers, tap tap, then snapped over with a pop
+    async tap(cd, dest, rot, faceUp, q) {
+      DR.pose = 'flat';
+      await Promise.all([tween(cd, { x: dest.x, y: dest.y, rot }, 0.24 * q, eIO), tween(DR, { x: dest.x + 8, y: dest.y - 46, rot: Math.PI - 0.05 }, 0.24 * q, eIO)]);
+      sndSlide(); DR.pose = 'point';
+      for (let i = 0; i < 2; i++) { await Promise.all([tween(DR, { y: dest.y - 34, sc: 0.94 }, 0.05), tween(cd, { sc: 0.97 }, 0.05)]); sndTap(); await Promise.all([tween(DR, { y: dest.y - 46, sc: 1 }, 0.06), tween(cd, { sc: 1 }, 0.06)]); }
+      if (faceUp) { cd.counted = false; await tween(cd, { sx: 0, sc: 1.18 }, 0.06); cd.face = true; sndFlip(); await tween(cd, { sx: 1, sc: 1 }, 0.12, (t) => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); }); settle(cd, 0.2); }
+    },
+  };
+  // about once every 20 rounds: the hole card comes off his fingers face-up for a split second
+  async function fumbleHole(cd) {
+    await tween(cd, { y: cd.y - 10, rot: 0.25 }, 0.08);
+    await flip(cd, true, true); tone(520, 0.06, 'triangle', 0.04);
+    await wait(0.32);
+    await flip(cd, false, true); await tween(cd, { y: cd.y + 10, rot: 0 }, 0.1);
+    chirp(say2('fum', ['Oops. You saw nothing.', 'Wala kang nakita. Wala.', 'Slippery cards today. Forget that.', 'Hala. Pretend you didn’t see that.']), 2.6);
+    const q = SEATS.filter(s => s.npc); if (q.length && Math.random() < 0.8) seatSay(pick(q), pick(['Nakita ko yun!', 'Uy, yung hole card!', 'Kuya Jun, butter fingers!', 'Hehe, nasilip ko.']), 2.2);
+  }
+  // the yellow cut card turns up: he holds it up for the table, sets it by the shoe, and finishes the round
+  async function cutCardOut() {
+    T.cutOut = true;
+    const cc = cutShow = { x: SHOE.x - 4, y: SHOE.y + 10, a: 1, rot: -0.5, sc: 1 }, p = { x: 400, y: D0.y + 64 };
+    DR.pose = 'pinch'; await tween(DR, { x: SHOE.x - 20, y: SHOE.y - 10, rot: Math.PI - 0.5 }, 0.16); sndSlide();
+    await Promise.all([tween(cc, { x: p.x, y: p.y, rot: 0, sc: 1.35 }, 0.38, eOut), tween(DR, { x: p.x + 18, y: p.y - 58, rot: Math.PI }, 0.38, eOut)]);
+    [523, 659].forEach((f, i) => tone(f, 0.1, 'square', 0.03, 0, i * 0.1));
+    chirp(say2('cco', ['Cut card! Last round of this shoe, then I shuffle.', 'There’s the cut card. Finish this one, then fresh shoe.', 'Blue card! One more round on these, then wash.']), 2.8);
+    const q = SEATS.filter(s => s.npc); if (q.length && Math.random() < 0.6) seatSay(pick(q), pick(['Ayan na yung cut card.', 'Last round na!', 'Shuffle na after nito.']), 2);
+    await tween(cc, { sc: 1.5 }, 0.14); await tween(cc, { sc: 1.35 }, 0.16); await wait(0.6);
+    await Promise.all([tween(cc, { x: SHOE.x - 70, y: SHOE.y + 34, rot: -0.25, sc: 0.8 }, 0.32), tween(DR, { x: SHOE.x - 54, y: SHOE.y - 18, rot: Math.PI - 0.2 }, 0.32)]);
+    sndSlide(); DR.pose = 'flat'; await home(DR, 0.2); DR.pose = 'pinch';
+  }
+  // 'facedown' deals: everything down first, then he turns the up-cards over down the line
+  async function flipUpAll() {
+    const order = [...(SR.inRound ? SR.cards : []), ...T.hands[0].cards, ...(SL.inRound ? SL.cards : []), T.d[0]];
+    DR.pose = 'flat';
+    for (const cd of order) { await tween(DR, { x: cd.x + 10, y: cd.y - 58, rot: Math.PI - 0.1 }, 0.11); await flip(cd, true, true); }
+    home(DR, 0.3);
+  }
+  // Perfect Pairs on R.J.'s first two cards: same rank and suit 25:1, same colour 12:1, mixed colours 6:1
+  function addPP() {
+    if (T.state !== 'bet' || fishballs < 1) return;
+    if (T.palm) { T.palm = false; DL.pose = 'flat'; home(DL, 0.3); }
+    setFish(fishballs - 1); T.pp++; vis.cup = Math.max(0, vis.cup - 1);
+    const P = PPS(); fly({ x: CUP.x, y: CUP.y - 40 }, P, 0, () => { vis.pp++; });
+    rjReach(); ui(); $('table-msg').textContent = `Perfect Pairs: ${T.pp}. Pays 25:1 perfect, 12:1 coloured, 6:1 mixed. Tap the × to take it back.`;
+  }
+  function clearPP() {
+    if (T.state !== 'bet' || !T.pp) return;
+    const n = T.pp, P = PPS(); T.pp = 0; setFish(fishballs + n); vis.pp = 0;
+    for (let i = 0; i < Math.min(n, 12); i++) fly(P, { x: CUP.x, y: CUP.y - 40 }, i * 0.03, null);
+    ui(); $('table-msg').textContent = 'Side bet off.';
+  }
+  async function settlePP() {
+    if (!T.pp) return;
+    const [a, b] = T.hands[0].cards.map(cd => cd.c), red = (c) => c.s === '♥' || c.s === '♦', P = PPS();
+    let m = 0, name = '';
+    if (a.r === b.r) { if (a.s === b.s) { m = 25; name = 'PERFECT PAIR'; } else if (red(a) === red(b)) { m = 12; name = 'COLORED PAIR'; } else { m = 6; name = 'MIXED PAIR'; } }
+    await wait(0.25);
+    if (m) {
+      const win = T.pp * m;
+      banner(`${name}! ${m} TO 1`, `${name}! Your side bet of ${T.pp} pays ${win}.`); chime();
+      for (let i = 0; i < Math.min(win, 24); i++) fly(BANK, P, i * 0.03, null);
+      await wait(0.9);
+      for (let i = 0; i < Math.min(win, 20); i++) fly(P, { x: CUP.x, y: CUP.y - 40 }, i * 0.03, null);
+      setFish(fishballs + win, true);
+      chirp(say2('ppW', ['Pair on the side? Fine. Take it.', 'Ugh. Side bet hits. Enjoy it, engineer.', 'Pares! Swerte mo talaga.']), 2.6);
+      await wait(0.5);
+    } else {
+      for (let i = 0; i < Math.min(T.pp, 16); i++) fly(P, BANK, i * 0.03, null);
+      T.pp = 0; await wait(0.45);
+    }
+  }
+  // the scuba: one hand pinches his nose, the other arm reaches out at you and waves like he's swimming off
+  async function scuba() {
+    await wait(0.35);
+    chirp(say2('scuba', ['Twenty-one. *scuba scuba*', 'Lunod ka, pare. Scuba!', 'Sisid muna tayo. *scuba*', '21, baby. Scuba time.', 'Blub blub blub. Twenty-one.']), 3.2);
+    const top = DL.home.y;
+    DL.pose = 'pinch'; DR.pose = 'flat';
+    await Promise.all([tween(DL, { x: 356, y: top - 26, rot: Math.PI + 1.3, sc: 0.9 }, 0.26), tween(DR, { x: 452, y: D0.y + 104, rot: Math.PI - 0.05, sc: 1.14 }, 0.26)]);
+    const blow = setInterval(() => { for (let k = 0; k < 2; k++) scubaFx.push({ x: 356 + rand(-10, 14), y: top - 10 + rand(-6, 6), r: rand(3, 8), vx: rand(-14, 14), vy: rand(-60, -30), life: rand(0.9, 1.4) }); }, 90);
+    for (let i = 0; i < 5; i++) {
+      tween(DL, { y: top - 30 + (i % 2) * 6 }, 0.12);
+      await tween(DR, { x: 504, rot: Math.PI - 0.42 }, 0.11); noise(0.04, 700, 0.03);
+      await tween(DR, { x: 400, rot: Math.PI + 0.36 }, 0.11);
+    }
+    clearInterval(blow);
+    const q = SEATS.filter(s => s.npc && s.say.t <= 0); if (q.length && Math.random() < 0.7) seatSay(pick(q), pick(['Ayan na naman yung scuba.', 'Kuya Jun, tama na!', 'Nakakainis yung scuba mo.', 'Hindi ka na nakakatawa.']), 2.4);
+    DL.pose = DR.pose = 'flat'; home(DL, 0.3); await home(DR, 0.3);
+  }
+  function stepBubbles(dt) { for (const b of scubaFx) { b.x += b.vx * dt + Math.sin(time * 6 + b.r) * 0.3; b.y += b.vy * dt; b.life -= dt; } scubaFx = scubaFx.filter(b => b.life > 0); }
+
+  // ---------- the wash, riffle and strip: 10-15 s of casino shuffle when the cut card has come out ----------
+  function stepWash(dt) {
+    if (!wash) return;
+    wash.t += dt; const t = wash.t, cx = 400, cy = wash.cy, k = 1 - Math.pow(0.003, dt);
+    for (const w of wash.cards) { const a = w.a0 + t * w.sp; w.cd.x = lerp(w.cd.x, cx + Math.cos(a) * w.r * 1.8, k); w.cd.y = lerp(w.cd.y, cy + Math.sin(a) * w.r * 0.6, k); w.cd.rot = w.r0 + a * 0.6; }
+    // both palms flat on the cards, scrubbing circles in opposite directions
+    const s = 5.2;
+    DL.x = cx - 86 + Math.cos(t * s) * 56; DL.y = cy - 40 + Math.sin(t * s) * 28; DL.rot = Math.PI + 0.3 + Math.sin(t * s) * 0.18;
+    DR.x = cx + 86 + Math.cos(-t * s + 1.2) * 56; DR.y = cy - 40 + Math.sin(-t * s + 1.2) * 28; DR.rot = Math.PI - 0.3 + Math.sin(t * s) * 0.18;
+    if (t - wash.snd > 0.3) { wash.snd = t; noise(0.26, 1800 + Math.random() * 900, 0.035); }
+  }
+  async function riffle(cs, cy) {
+    const half = Math.floor(cs.length / 2) + Math.round(rand(-3, 3)), L = cs.slice(0, half), R = cs.slice(half);
+    DL.pose = DR.pose = 'flat';
+    await Promise.all([...L.map((cd, i) => tween(cd, { x: 400 - 64 + i * 0.35, y: cy - i * 0.35, rot: -0.14 }, 0.2)), ...R.map((cd, i) => tween(cd, { x: 400 + 64 + i * 0.35, y: cy - i * 0.35, rot: 0.14 }, 0.2)),
+      tween(DL, { x: 400 - 104, y: cy - 30, rot: Math.PI + 0.7 }, 0.2), tween(DR, { x: 400 + 104, y: cy - 30, rot: Math.PI - 0.7 }, 0.2)]);
+    DL.pose = DR.pose = 'pinch';
+    await Promise.all([...cs.map(cd => tween(cd, { sc: 1.07 }, 0.08)), tween(DL, { x: 400 - 92 }, 0.08), tween(DR, { x: 400 + 92 }, 0.08)]);
+    // thumbs let go from the bottom up, the two halves dropping into each other
+    const order = []; let i = 0, j = 0;
+    while (i < L.length || j < R.length) { const takeL = j >= R.length || (i < L.length && Math.random() < 0.5); order.push(takeL ? L[i++] : R[j++]); }
+    const span = 0.55;
+    await Promise.all(order.map((cd, n) => wait(n * span / order.length).then(() => { cd.z = T.z++; if (n % 2 === 0) noise(0.012, 5200, 0.03); return tween(cd, { x: 400 + n * 0.35, y: cy - n * 0.35, rot: 0, sc: 1 }, 0.1); })));
+    DL.pose = DR.pose = 'flat';
+    await Promise.all([tween(DL, { x: 400 - 44, y: cy - 28, rot: Math.PI + 0.9 }, 0.12), tween(DR, { x: 400 + 44, y: cy - 28, rot: Math.PI - 0.9 }, 0.12)]); sndSlide();
+    cs.splice(0, cs.length, ...order);
+  }
+  async function washShuffle() {
+    T.state = 'anim'; ui();
+    chirp(say2('wash', ['Okay, shoe’s done. Wash muna.', 'Time to shuffle. Patience, engineer.', 'Fresh shoe coming. Wash, riffle, cut.']), 3);
+    const q = SEATS.filter(s => s.npc); if (q.length && Math.random() < 0.6) seatSay(pick(q), pick(['Ang sarap panoorin nito.', 'Bilisan mo, Kuya Jun!', 'Ayan, ASMR.', 'Shuffle ng casino, o!']), 2.6);
+    const cy = midY(), N = 46, cs = [], fromTray = Math.round(N * 0.74);
+    for (let i = 0; i < N; i++) { const tr = i < fromTray, cd = { c: null, x: tr ? TRAY.x : SHOE.x - 4, y: tr ? TRAY.y : SHOE.y + 10, rot: tr ? 0.4 : -0.5, sx: 1, sc: 1, face: false, z: T.z++, k: 0.82 }; cs.push(cd); T.cards.push(cd); }
+    DL.pose = DR.pose = 'flat';
+    await Promise.all([tween(DL, { x: TRAY.x + 30, y: TRAY.y - 30, rot: Math.PI + 0.3 }, 0.24), tween(DR, { x: SHOE.x - 20, y: SHOE.y - 10, rot: Math.PI - 0.4 }, 0.24)]);
+    T.discard = 0; T.shoeOut = true; sndSlide();
+    // everything comes out onto the felt in a loose spread
+    await Promise.all([...cs.map((cd, i) => tween(cd, { x: 400 + rand(-70, 70) + (i < fromTray ? -50 : 60), y: cy + rand(-26, 26), rot: rand(-1.2, 1.2) }, 0.42 + i * 0.004)),
+      tween(DL, { x: 330, y: cy - 44, rot: Math.PI + 0.3 }, 0.42), tween(DR, { x: 470, y: cy - 44, rot: Math.PI - 0.3 }, 0.42), cutShow ? tween(cutShow, { x: 470, y: cy, a: 0, rot: 0.6 }, 0.42) : wait(0)]);
+    cutShow = null; noise(0.3, 2400, 0.05);
+    // the wash: palms down, big slow circles
+    wash = { t: 0, snd: 0, cy, cards: cs.map(cd => ({ cd, a0: rand(0, 6.28), sp: rand(0.8, 1.5) * (Math.random() < 0.5 ? -1 : 1), r: 18 + Math.sqrt(Math.random()) * 90, r0: rand(-1, 1) })) };
+    await wait(2.4);
+    wash = null;
+    // pushed together into one brick
+    await Promise.all([...cs.map((cd, i) => tween(cd, { x: 400 + i * 0.35, y: cy - i * 0.35, rot: 0 }, 0.42)), tween(DL, { x: 344, y: cy - 30, rot: Math.PI + 0.9 }, 0.42), tween(DR, { x: 456, y: cy - 30, rot: Math.PI - 0.9 }, 0.42)]);
+    sndSlide(); cs.forEach(cd => { cd.z = T.z++; });
+    // riffle, riffle, strip, riffle
+    await riffle(cs, cy); await riffle(cs, cy);
+    { const k = Math.floor(cs.length * rand(0.3, 0.42)), top = cs.slice(cs.length - k), rest = cs.slice(0, cs.length - k);
+      DR.pose = 'pinch';
+      await Promise.all([...top.map((cd, i) => tween(cd, { x: 400 + 96 + i * 0.35, y: cy - 8 - i * 0.35 }, 0.2)), tween(DR, { x: 400 + 110, y: cy - 60, rot: Math.PI - 0.2 }, 0.2)]); sndSlide();
+      DL.pose = 'pinch'; rest.forEach(cd => { cd.z = T.z++; });
+      await Promise.all([...rest.map((cd, i) => tween(cd, { x: 400 + 96 + (top.length + i) * 0.35, y: cy - 8 - (top.length + i) * 0.35 }, 0.22)), tween(DL, { x: 400 + 70, y: cy - 56, rot: Math.PI + 0.4 }, 0.22)]); sndSlide();
+      cs.splice(0, cs.length, ...top, ...rest);
+      await Promise.all([...cs.map((cd, i) => tween(cd, { x: 400 + i * 0.35, y: cy - i * 0.35 }, 0.18)), tween(DL, { x: 344, y: cy - 30, rot: Math.PI + 0.9 }, 0.18), tween(DR, { x: 456, y: cy - 30, rot: Math.PI - 0.9 }, 0.18)]); }
+    await riffle(cs, cy);
+    // squared up: tap tap
+    DL.pose = DR.pose = 'flat';
+    for (let i = 0; i < 2; i++) { await Promise.all([tween(DL, { x: 352 }, 0.06), tween(DR, { x: 448 }, 0.06)]); sndTap(); await Promise.all([tween(DL, { x: 340 }, 0.06), tween(DR, { x: 460 }, 0.06)]); }
+    home(DL, 0.3); home(DR, 0.3);
+    T.cards = T.cards.filter(c => !cs.includes(c)); T.shoeOut = false;
+    return { x: 400, y: cy };
+  }
+  // R.J. walked off for a while: the game kept going without him. Burn through the shoe as if those rounds happened.
+  function simulateAway() {
+    if (!T.everDealt || T.state !== 'bet' || T.cutOut) return '';
+    const away = (performance.now() - (T.closedAt || 0)) / 1000, rounds = clamp(Math.round(away / 25 + rand(0.5, 2.5)), 1, 9);
+    let shuffled = false;
+    for (let r = 0; r < rounds; r++) {
+      const n = Math.round(rand(7, 14));
+      if (shoe.length - n <= T.cutAt) {   // they hit the cut card while he was gone: someone else cut a new shoe
+        newShoe(); shuffled = true; const b = 2 + Math.floor(Math.random() * 11);
+        for (let i = 0; i < b; i++) shoe.pop(); T.discard = b; continue;
+      }
+      for (let i = 0; i < n; i++) { T.rc += hilo(shoe.pop()); T.discard++; }
+    }
+    return shuffled ? pick(['Welcome back. We shuffled while you were out.', 'You missed a new shoe, pare. We kept going.']) : pick(['Welcome back. Shoe’s still going.', 'Oh, he’s back. We didn’t wait for you.', 'Balik ka? Sige, same shoe pa.']);
   }
   // the total only picks a card up a beat after it has finished turning over
   const settle = (cd, d = 0.3) => { wait(d).then(() => { if (cd.face) cd.counted = true; }); };
@@ -3706,10 +4205,10 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   const midY = () => (D0.y + 56 + CIRCLE.y - 112 - 56) / 2;
   function ribbonGeo() { const L = narrowT ? 300 : 520; return { x0: 400 - L / 2, L, y: midY() }; }
   function doCut(f) { if (!cutResolve) return; const r = cutResolve; cutResolve = null; r(f); }
-  function drawCutCard(x, y, a) {
-    ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.scale(0.72 * CS, 0.72 * CS);
-    rr(-29, -41, 58, 82, 6, '#f6c343', 1.6); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(-25, -37, 10, 74);
-    ctx.fillStyle = '#7a4a0a'; ctx.font = `14px ${DISPLAY}`; ctx.textAlign = 'center'; ctx.save(); ctx.rotate(-Math.PI / 2); ctx.fillText('CUT', 0, 5); ctx.restore();
+  function drawCutCard(x, y, a, rot = 0, sc = 1, blue = false) {
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.rotate(rot); ctx.scale(0.72 * CS * sc, 0.72 * CS * sc);
+    rr(-29, -41, 58, 82, 6, blue ? '#5fc8ff' : '#f6c343', 1.6); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(-25, -37, 10, 74);
+    ctx.fillStyle = blue ? '#0b3a66' : '#7a4a0a'; ctx.font = `14px ${DISPLAY}`; ctx.textAlign = 'center'; ctx.save(); ctx.rotate(-Math.PI / 2); ctx.fillText('CUT', 0, 5); ctx.restore();
     ctx.restore();
   }
   // Filipino-style dice: the one and the four are red
@@ -3734,12 +4233,12 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
       const b = Math.floor(t * 3.2); if (b !== d.bounce) { d.bounce = b; if (t > 0.05 && t < 0.99) tone(900 + Math.random() * 300, 0.03, 'square', 0.025); noise(0.03, 2600, 0.04); }
     }
   }
-  async function ceremony() {
+  async function ceremony(o = {}) {
     newShoe(); T.discard = 0;
-    chirp(say2('shuf', ['Bagong upo, bagong baraha. Shuffle muna.', 'Fresh shoe for the engineer. Let me shuffle.', 'New sitting, new deck. Shuffle up.']), 2.6);
-    // the shuffled deck comes out of the box and gets ribboned across the table
-    const g = ribbonGeo(), N = 26, rib = [];
-    for (let i = 0; i < N; i++) { const cd = { c: null, x: SHOE.x - 4, y: SHOE.y + 10, rot: -0.5, sx: 1, sc: 1, face: false, z: T.z++, k: narrowT ? 0.6 : 0.72 }; rib.push(cd); T.cards.push(cd); }
+    if (!o.from) chirp(say2('shuf', ['Bagong upo, bagong baraha. Shuffle muna.', 'Fresh shoe for the engineer. Let me shuffle.', 'New sitting, new deck. Shuffle up.']), 2.6);
+    // the shuffled deck comes out of the box (or straight off the shuffle) and gets ribboned across the table
+    const g = ribbonGeo(), N = 26, rib = [], src = o.from || { x: SHOE.x - 4, y: SHOE.y + 10 };
+    for (let i = 0; i < N; i++) { const cd = { c: null, x: src.x + i * 0.35, y: src.y - i * 0.35, rot: o.from ? 0 : -0.5, sx: 1, sc: 1, face: false, z: T.z++, k: narrowT ? 0.6 : 0.72 }; rib.push(cd); T.cards.push(cd); }
     DR.pose = 'flat';
     await Promise.all([...rib.map(cd => tween(cd, { x: g.x0 + g.L, y: g.y, rot: 0 }, 0.42)), tween(DR, { x: g.x0 + g.L + 24, y: g.y - 52, rot: Math.PI }, 0.42)]);
     sndSlide();
@@ -3767,15 +4266,23 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     await Promise.all([...A.map((cd, i) => tween(cd, { x: pb.x + (B.length + i) * 0.5, y: pb.y - (B.length + i) * 0.5 }, 0.36)), tween(DL, { x: pb.x - 24, y: pb.y - 46 }, 0.36)]);
     sndSlide(); home(DL, 0.3);
     if (q.length && Math.random() < 0.5) seatSay(pick(q), pick(['Ganda ng cut!', 'Ayan. Swerte yan.', 'Okay, okay. Nice.']), 2.2);
-    await Promise.all([...rib.map(cd => tween(cd, { x: SHOE.x - 4, y: SHOE.y + 10, rot: -0.5 }, 0.42)), tween(cutCard, { x: SHOE.x, y: SHOE.y + 10, a: 0 }, 0.42), tween(DR, { x: SHOE.x - 22, y: SHOE.y - 34, rot: Math.PI - 0.5 }, 0.42)]);
-    T.cards = T.cards.filter(c => !rib.includes(c)); T.ribbon = null; cutCard = null; sndSlide(); home(DR, 0.3);
+    // R.J.'s cut card comes out; Kuya Jun pushes his own yellow card in deep, near the back of the shoe
+    await tween(cutCard, { a: 0, y: cutCard.y + 20 }, 0.2); cutCard = null;
+    const dc = dealerCut = { x: pb.x + 130, y: pb.y + 50, a: 0, rot: 0.1, sc: 0.95 };
+    DR.pose = 'pinch';
+    await Promise.all([tween(dc, { a: 1, x: pb.x + 74, y: pb.y + 10 }, 0.26), tween(DR, { x: pb.x + 96, y: pb.y - 42, rot: Math.PI - 0.1 }, 0.26)]);
+    chirp(say2('dcut', ['My blue card goes in the middle. When it shows up, last round.', 'Cut card’s in. When it comes out, I shuffle.', 'Blue card, halfway down. That’s our last round, when it comes.']), 2.8);
+    await wait(0.3);
+    await Promise.all([tween(dc, { x: pb.x + 26, y: pb.y + 8, sc: 0.8 }, 0.3), tween(DR, { x: pb.x + 50 }, 0.3)]); sndSlide(); DR.pose = 'flat';
+    await Promise.all([...rib.map(cd => tween(cd, { x: SHOE.x - 4, y: SHOE.y + 10, rot: -0.5 }, 0.42)), tween(dc, { x: SHOE.x, y: SHOE.y + 10, a: 0, rot: -0.5 }, 0.42), tween(DR, { x: SHOE.x - 22, y: SHOE.y - 34, rot: Math.PI - 0.5 }, 0.42)]);
+    T.cards = T.cards.filter(c => !rib.includes(c)); T.ribbon = null; dealerCut = null; sndSlide(); home(DR, 0.3);
     // two dice, rolled down the middle of the table
     const n = await rollDice();
     await burn(n);
     // he scoops the dice back up
     DL.pose = 'flat'; await tween(DL, { x: (dice[0].x + dice[1].x) / 2, y: dice[0].y - 40, rot: Math.PI }, 0.3);
     DL.pose = 'fist'; dice = []; diceAnim = null; diceSum = 0; tone(700, 0.04, 'square', 0.02);
-    await home(DL, 0.3); DL.pose = 'flat';
+    await home(DL, 0.3); DL.pose = 'flat'; T.everDealt = true;
   }
   async function rollDice() {
     const my = midY(), vals = [1 + Math.floor(Math.random() * 6), 1 + Math.floor(Math.random() * 6)];
@@ -3824,15 +4331,29 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   const pileAt = (i) => T.hands.length > 1 ? { x: slot(i, 0).x + 6, y: CIRCLE.y - 4 } : { x: CIRCLE.x, y: CIRCLE.y };
   const INS = () => ({ x: CIRCLE.x + 116, y: CIRCLE.y - 10 });
   function canSplit() { const h = cur(); return T.state === 'player' && h && h.cards.length === 2 && cardV(h.cards[0]) === cardV(h.cards[1]) && T.hands.length < 4 && fishballs >= h.bet && !h.acesSplit; }
+  // Only the moves you can make right now are shown, and they pop up when it's your call.
+  // Hit and Stand are the big ones; Double and Split sit beside them when they're allowed.
+  let uiKey = '';
   function ui() {
-    const s = T.state, h = cur();
-    $('deal').disabled = !(s === 'bet' && T.bet > 0);
-    $('hit').disabled = s !== 'player'; $('stand').disabled = s !== 'player';
-    $('double').disabled = !(s === 'player' && h && h.cards.length === 2 && fishballs >= h.bet && !h.acesSplit);
-    $('split').disabled = !canSplit();
+    const s = T.state, h = cur(), betting = s === 'bet', playing = s === 'player';
+    const show = (id, on, sub) => { const b = $(id); b.hidden = !on; b.disabled = !on; const sm = b.querySelector('small'); if (sm && sub !== undefined) sm.textContent = on ? sub : ''; };
+    const need = Math.max(0, (T.lastBet || 0) - T.bet) + Math.max(0, (T.lastPP || 0) - T.pp);
+    show('deal', betting && T.bet > 0, `${T.bet} on the circle${T.pp ? ` + ${T.pp} pairs` : ''}`);
+    show('rebet', betting && need > 0 && fishballs > 0, `same as last (${(T.lastBet || 0) + (T.lastPP || 0)})`);
+    show('allin', betting && fishballs > 0, `all ${fishballs + T.bet}`);
+    const v = h && h.cards.length ? info(h.cards) : null;
+    show('hit', playing, 'take a card');
+    show('stand', playing, v ? `keep ${v.soft && v.v < 21 ? 'soft ' : ''}${v.v}` : 'keep it');
+    show('double', playing && h && h.cards.length === 2 && fishballs >= h.bet && !h.acesSplit, h ? `+${h.bet}, one card` : '');
+    show('split', canSplit(), 'make two hands');
     $('ins-row').hidden = s !== 'ins';
-    if (s === 'ins') { const c = insCost(); $('ins-yes').disabled = fishballs < c; $('ins-yes').textContent = `Insurance (${c})`; }
-    $('play-row').hidden = s === 'ins' || s === 'cut'; $('cut-row').hidden = s !== 'cut';
+    if (s === 'ins') { const c = insCost(); $('ins-yes').hidden = fishballs < c; $('ins-yes').disabled = fishballs < c; $('ins-yes').querySelector('small').textContent = `costs ${c}, pays 2:1`; }
+    $('cut-row').hidden = s !== 'cut';
+    $('play-row').hidden = !(betting || playing);
+    $('decide-head').textContent = playing && v ? (T.hands.length > 1 ? `HAND ${T.hi + 1} · ` : '') + `YOU ${v.soft && v.v < 21 ? 'SOFT ' : ''}${v.v} · DEALER SHOWS ${upName().toUpperCase()}` : betting ? (T.bet ? 'READY? DEAL WHEN YOU ARE' : fishballs ? 'TAP THE CUP TO BET' : '') : '';
+    // a new decision: the choices pop up
+    const key = s + '|' + ['deal', 'rebet', 'allin', 'hit', 'stand', 'double', 'split', 'ins-yes'].filter(id => !$(id).hidden).join(',') + '|' + T.hi;
+    if (key !== uiKey) { uiKey = key; const el = s === 'ins' ? $('ins-row') : (betting || playing) ? $('play-row') : null; if (el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); } }
     $('bet-add').disabled = !(s === 'bet' && fishballs > 0); $('bet-sub').disabled = !(s === 'bet' && T.bet > 0);
     $('broke-row').hidden = !(s === 'bet' && fishballs === 0 && T.bet === 0);
     if (s === 'bet' && fishballs === 0 && T.bet === 0) $('table-msg').textContent = 'Walang taya, walang laro. Grab fishballs from Mang Boy first.';
@@ -3851,6 +4372,31 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     fly({ x: CIRCLE.x, y: CIRCLE.y }, { x: CUP.x, y: CUP.y - 40 }, 0, () => { vis.cup++; });
     ui(); $('table-msg').textContent = T.bet ? `Taya: ${T.bet}.` : 'Tap the cup to bet a fishball.';
   }
+  // re-bet the last round's bet (side bet too); all in shoves the whole cup onto the circle
+  function bulkBet(n, pp) {
+    if (n <= 0) return; if (T.palm) { T.palm = false; DL.pose = 'flat'; home(DL, 0.3); }
+    setFish(fishballs - n); if (pp) T.pp += n; else T.bet += n;
+    const to = pp ? PPS() : { x: CIRCLE.x, y: CIRCLE.y };
+    for (let i = 0; i < Math.min(n, 20); i++) fly({ x: CUP.x, y: CUP.y - 40 }, to, i * 0.035, null);
+  }
+  function rebet() {
+    if (T.state !== 'bet') return;
+    const m = Math.min(Math.max(0, (T.lastBet || 0) - T.bet), fishballs); bulkBet(m, false);
+    const q = Math.min(Math.max(0, (T.lastPP || 0) - T.pp), fishballs); bulkBet(q, true);
+    if (m || q) { rjReach(); $('table-msg').textContent = `Same again: ${T.bet} on the circle${T.pp ? `, ${T.pp} on pairs` : ''}.`; }
+    ui();
+  }
+  function allIn() {
+    if (T.state !== 'bet' || fishballs < 1) return;
+    const n = fishballs; bulkBet(n, false); rjDouble().then(() => { RR.pose = 'flat'; home(RR); });
+    chirp(say2('allin', ['ALL IN?! Okay, engineer. Okay.', 'Lahat?! Sige. Pray to Santo Niño.', 'Whoa. Big man. Let’s see it.', 'All of it? Bold. Stupid, but bold.']), 3);
+    const q = SEATS.filter(s => s.npc); if (q.length) seatSay(pick(q), pick(['ALL IN?! Lakas!', 'Hala, lahat!', 'RJ, sure ka?!', 'Grabe, all in!']), 2.4);
+    ui(); $('table-msg').textContent = `ALL IN: ${T.bet} fishballs on the circle. Deal when you dare.`;
+  }
+  // the all-in spotlight: everything else goes dark around the moment that matters
+  async function spotOn(x, y, r = 130) { if (!T.spot || T.spot.a < 0.05) T.spot = { x, y, a: 0, r: 330 }; await tween(T.spot, { x, y, a: 1, r }, 0.45); }
+  async function spotOff() { if (T.spot && T.spot.a > 0.01) await tween(T.spot, { a: 0, r: 330 }, 0.42); }
+  async function sweat(sec) { drumroll(sec); await wait(sec * 0.82); }
   function yourTurn() { T.state = 'player'; ui(); chirp(adviceLine(), 6); }
   async function relayout(d = 0.32) { await Promise.all(T.hands.flatMap((h, hi) => h.cards.map((cd, i) => { const s = slot(hi, i); return tween(cd, { x: s.x, y: s.y }, d); }))); }
 
@@ -3890,17 +4436,31 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     T.state = 'anim'; ui();
     if (T.palm) { T.palm = false; DL.pose = 'flat'; home(DL, 0.25); }
     if (T.fresh) { T.fresh = false; await ceremony(); }
+    T.lastBet = T.bet; T.lastPP = T.pp; T.allin = fishballs === 0;
+    if (T.allin) banner('ALL IN', `All in: ${T.bet + T.pp} fishballs riding on this one.`);
     $('table-msg').textContent = 'Dealing…';
     T.hands = [{ cards: [], bet: T.bet, base: T.bet }]; T.hi = 0; T.p = T.hands[0].cards; T.ins = 0;
     for (const s of SEATS) { s.inRound = !!s.npc; s.cards = []; s.doubled = false; s.dbl = false; s.swept = false; s.say.t = Math.min(s.say.t, 0.4); }
-    if (Math.random() < 0.5) chirp(say2('deal', ['{b} fishball{s}? Big spender.', 'Sige, let’s see what the engineer’s got.', 'Cut the deck? Joke lang. I cut it.', 'Shuffle up and deal. Mostly deal.', '{b}? Your lola bets more than that.', 'Okay, okay. Cards up, pride down.'], { b: T.bet, s: T.bet === 1 ? '' : 's' }), 2.6);
+    const style = pickStyle();
+    T.dstyle = style; T.lastStyle = style; T.fumble = Math.random() < 0.05;
+    const styleLine = { flick: ['Watch the wrist.', 'Smooth operator, pare.', 'Casino-style. Sort of.'], smooth: ['Express lane.', 'Bilisan natin.'], facedown: ['All down first. Suspense.', 'Face-down muna lahat.'],
+      pitch: ['Air mail!', 'Catch, pare.', 'Special delivery.'], curve: ['Curveball!', 'Banana kick, card edition.'], cartwheel: ['Ikot-ikot!', 'Watch it spin.'], tap: ['Tap tap… boom.', 'Knock knock.'] }[style];
+    if (styleLine && Math.random() < 0.4) chirp(say2('st' + style, styleLine), 2.2);
+    else if (Math.random() < 0.5) chirp(say2('deal', ['{b} fishball{s}? Big spender.', 'Sige, let’s see what the engineer’s got.', 'Cut the deck? Joke lang. I cut it.', 'Shuffle up and deal. Mostly deal.', '{b}? Your lola bets more than that.', 'Okay, okay. Cards up, pride down.'], { b: T.bet, s: T.bet === 1 ? '' : 's' }), 2.6);
     // dealt from the dealer's left: first base (R.J.'s right), R.J., third base, then the dealer
+    const up = style !== 'facedown';
+    let lit = false;
     for (let pass = 0; pass < 2; pass++) {
-      if (SR.inRound) await dealCard(SR, true);
-      await dealCard('p', true);
-      if (SL.inRound) await dealCard(SL, true);
-      await dealCard(pass ? 'hole' : 'd', !pass);
+      if (SR.inRound) await dealCard(SR, up);
+      if (pass === 1 && lit) await sweat(1.0);
+      await dealCard('p', up);
+      if (pass === 0 && T.allin && up && cardV(T.p[0]) >= 10) { lit = true; const s0 = pSlot(0); spotOn(s0.x + 22, s0.y - 10, 140); }   // a ten or an ace: everybody waits on the second card
+      if (pass === 1 && lit) { await wait(0.7); await spotOff(); }
+      if (SL.inRound) await dealCard(SL, up);
+      await dealCard(pass ? 'hole' : 'd', !pass && up);
     }
+    if (!up) { await wait(0.15); await flipUpAll(); T.dstyle = 'classic'; }
+    await settlePP();
     if (T.d[0].c.r === 'A') await insurancePhase();
     else if (cardV(T.d[0]) === 10) await peek();
     if (isBJ(T.d)) return finish();
@@ -3930,7 +4490,11 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   async function doHit() {
     if (T.state !== 'player') return; const rx = reaction('H'); rjPlayComment('H'); T.state = 'anim'; ui();
     if (rx) chirp(rx, 3.6); else T.chirpT = Math.min(T.chirpT, 0.3);
-    await rjTap(); await dealCard('p', true);
+    await rjTap();
+    const pre = info(T.p), risky = T.allin && !pre.soft && pre.v >= 12;
+    if (risky) { const s1 = slot(T.hi, T.p.length); await spotOn(s1.x, s1.y, 130); await sweat(1.1); }
+    await dealCard('p', true);
+    if (risky) { await wait(0.6); await spotOff(); }
     await afterCard(rx ? 1.2 : 0.1);
   }
   async function doStand() {
@@ -4005,14 +4569,19 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   }
   async function finish() {
     T.state = 'anim'; ui();
+    const dmid = () => ({ x: T.d.reduce((a, c) => a + c.x, 0) / T.d.length, y: D0.y });
+    const lit = T.allin && T.hands.some(h => handVal(h.cards) <= 21);
+    if (lit) { await spotOn(HOLE.x, HOLE.y + 6, 150); await sweat(1.3); }
     await reveal();
+    if (lit) tween(T.spot, { x: dmid().x, y: D0.y }, 0.3);
     const dStart = handVal(T.d);
     const hiddenHands = T.hands.filter(h => h.cards.length && !h.cards[h.cards.length - 1].face);
     // the dealer plays out first; R.J.'s doubled cards stay face-down until he's done
     const natural = T.hands.length === 1 && isBJ(T.hands[0].cards);
     const rjLive = !natural && T.hands.some(h => h.cards.some(c => !c.face) || handVal(h.cards) <= 21);
     const seatLive = SEATS.some(s => s.inRound && s.cards.length && handVal(s.cards) <= 21 && !isBJ(s.cards));
-    if ((rjLive || seatLive) && !isBJ(T.d)) { while (handVal(T.d) < 17) { await dealCard('d', true); await wait(0.3); } }
+    if ((rjLive || seatLive) && !isBJ(T.d)) { while (handVal(T.d) < 17) { if (lit) { tween(T.spot, { x: dSlot(T.d.length).x - 20, r: 150 + T.d.length * 14 }, 0.3); await sweat(0.8); } await dealCard('d', true); await wait(lit ? 0.6 : 0.3); } }
+    if (lit) { await wait(0.5); await spotOff(); }
     await wait(0.25);
     for (const h of hiddenHands) {
       const cd = h.cards[h.cards.length - 1], pre = info(h.cards.slice(0, -1));
@@ -4080,7 +4649,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     const quiet = SEATS.filter(s => s.npc && s.say.t <= 0);
     if (quiet.length && Math.random() < 0.7) { const k = rjRes === 'bj' ? 'rjBJ' : rjRes === 'win' ? 'rjWin' : rjRes === 'bust' ? 'rjBust' : rjRes === 'lose' ? 'rjLose' : null; if (k) seatSay(pick(quiet), say2('n' + k, RJC[k]), 2.6); }
     else if (seatsIn.length && Math.random() < 0.6) { const s = pick(seatsIn); const k = rjRes === 'bj' ? 'rjBJ' : rjRes === 'win' ? 'rjWin' : rjRes === 'bust' ? 'rjBust' : rjRes === 'lose' ? 'rjLose' : null; if (k) setTimeout(() => seatSay(s, say2('n' + k, RJC[k]), 2.6), 1500); }
-    if (gloat) await rubItIn(); else await wait(0.6);
+    if (dv === 21) await scuba(); else if (gloat) await rubItIn(); else await wait(0.6);
     await Promise.all(emotes);
     // did the house take everything? then he sweeps the table in one motion instead of hand by hand
     const leftR = T.hands.filter(hh => !hh.swept && hh.cards.length), leftS = seatsIn.filter(s => !s.swept);
@@ -4099,10 +4668,12 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
     setFish(fishballs + ret - keep, ret - keep > 0);
     T.hands = []; T.hi = 0; T.p = []; T.bet = keep; vis.circle = keep;
     for (const s of SEATS) s.inRound = false;
+    T.allin = false;
     await wait(0.45);
     await cycleSeats();
+    if (T.cutOut) { const brick = await washShuffle(); await ceremony({ from: brick }); }
     DL.pose = 'palm'; T.palm = true; await tween(DL, { x: 400, y: D0.y + 42, rot: Math.PI }, 0.32);
-    T.state = 'bet'; ui();
+    T.state = 'bet'; ui(); vis.pp = T.pp;
     $('table-msg').textContent = T.bet ? `${sub} Your ${T.bet} is back on the circle: deal again, or tap it to take some back.` : `${sub} Tap the cup to bet again.`;
   }
 
@@ -4110,14 +4681,19 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   // ---------- input ----------
   const feltPt = (e) => { const r = felt.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * VW() + OX(), y: (e.clientY - r.top) / r.height * VH }; };
   const onRibbon = (p) => { const R = T.ribbon; return R && p.x > R.x0 - 24 && p.x < R.x0 + R.L + 24 && Math.abs(p.y - R.y) < 58 ? clamp((p.x - R.x0) / R.L, 0.06, 0.94) : null; };
-  felt.addEventListener('click', (e) => { ensureAudio(); const p = feltPt(e); if (T.state === 'cut') { const f = onRibbon(p); if (f !== null) doCut(f); return; } if (Math.hypot(p.x - CUP.x, p.y - (CUP.y - 10)) < 64) addBall(); else if (Math.hypot(p.x - CIRCLE.x, p.y - CIRCLE.y) < CIRCLE.r + 14) takeBall(); });
-  felt.addEventListener('pointermove', (e) => { const p = feltPt(e); if (T.state === 'cut') { T.cutHover = onRibbon(p); felt.style.cursor = T.cutHover !== null ? 'pointer' : 'default'; return; } const over = (T.state === 'bet') && (Math.hypot(p.x - CUP.x, p.y - (CUP.y - 10)) < 64 || (T.bet && Math.hypot(p.x - CIRCLE.x, p.y - CIRCLE.y) < CIRCLE.r + 14)); felt.style.cursor = over ? 'pointer' : 'default'; });
+  const onPPx = (p) => { const P = PPS(); return T.pp > 0 && Math.hypot(p.x - (P.x + P.r + 4), p.y - (P.y - P.r + 2)) < 16; };
+  const onPP = (p) => { const P = PPS(); return Math.hypot(p.x - P.x, p.y - P.y) < P.r + 8; };
+  felt.addEventListener('click', (e) => { ensureAudio(); const p = feltPt(e); if (T.state === 'cut') { const f = onRibbon(p); if (f !== null) doCut(f); return; } if (onPPx(p)) clearPP(); else if (onPP(p)) addPP(); else if (Math.hypot(p.x - CUP.x, p.y - (CUP.y - 10)) < 64) addBall(); else if (Math.hypot(p.x - CIRCLE.x, p.y - CIRCLE.y) < CIRCLE.r + 14) takeBall(); });
+  felt.addEventListener('pointermove', (e) => { const p = feltPt(e); if (T.state === 'cut') { T.cutHover = onRibbon(p); felt.style.cursor = T.cutHover !== null ? 'pointer' : 'default'; return; } const over = (T.state === 'bet') && (onPP(p) || onPPx(p) || Math.hypot(p.x - CUP.x, p.y - (CUP.y - 10)) < 64 || (T.bet && Math.hypot(p.x - CIRCLE.x, p.y - CIRCLE.y) < CIRCLE.r + 14)); felt.style.cursor = over ? 'pointer' : 'default'; });
   $('deal').addEventListener('click', doDeal); $('hit').addEventListener('click', doHit); $('stand').addEventListener('click', doStand); $('double').addEventListener('click', doDouble);
   $('bet-add').addEventListener('click', addBall); $('bet-sub').addEventListener('click', takeBall);
   $('cut-btn').addEventListener('click', () => doCut(rand(0.3, 0.7)));
   $('split').addEventListener('click', doSplit); $('ins-yes').addEventListener('click', () => insure(true)); $('ins-no').addEventListener('click', () => insure(false));
   $('go-food').addEventListener('click', () => { closeGames(); openFood(); });
-  function stepTable(dt) { stepTweens(dt); stepFlyers(dt); stepSweep(dt); stepDice(); }
+  $('rebet').addEventListener('click', rebet); $('allin').addEventListener('click', allIn);
+  $('pp-add').addEventListener('click', addPP); $('pp-clear').addEventListener('click', clearPP);
+  function countSeen() { for (const cd of T.cards) if (cd.face && cd.c && !cd.seen) { cd.seen = true; T.rc += hilo(cd.c); } }
+  function stepTable(dt) { stepTweens(dt); countSeen(); stepFlyers(dt); stepSweep(dt); stepDice(); stepWash(dt); stepBubbles(dt); }
 
   // ---------- opening and closing the game views ----------
   const gFood = $('game-food'), gCards = $('game-cards');
@@ -4125,17 +4701,19 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   function openFood() { keys.l = keys.r = false; closeSheet(); gFood.hidden = false; visitedFood = true; syncHud(); SV.narrow = null; gFood.querySelector('.close').focus({ preventScroll: true }); vendorSay = { text: pick(['Tusok, tusok! Libre ngayon.', 'Fishball, pogi? Tusok mo lang.', 'Mainit pa! Kuha ka.']), t: 2.6 }; chime(); }
   function openCards() {
     keys.l = keys.r = false; closeSheet(); gCards.hidden = false; vis.cup = fishballs; vis.circle = T.bet;
-    seatOpening(); narrowT = null; T.fresh = true;   // every new sitting starts with a cut, the dice and the burn   // re-measure: the table fills whatever space the screen has
+    seatOpening(); narrowT = null;   // re-measure: the table fills whatever space the screen has
+    const back = simulateAway();   // the first sitting starts with a cut; after that the shoe just keeps going
     ui(); if (T.state === 'bet' && (fishballs || T.bet)) $('table-msg').textContent = T.bet ? `Taya: ${T.bet}. Deal when ready.` : 'Tap the fishball cup to bet one fishball at a time.';
+    if (back) chirp(back, 3);
     gCards.querySelector('.close').focus({ preventScroll: true }); chime();
   }
-  function closeGames() { const wasOpen = gameOpen(); gFood.hidden = true; gCards.hidden = true; if (!POOL.hidden) POOL.close(); if (T.state === 'bet' && T.bet) { setFish(fishballs + T.bet); T.bet = 0; vis.circle = 0; } if (wasOpen) actBtn.focus({ preventScroll: true }); }
+  function closeGames() { const wasOpen = gameOpen(), wasCards = !gCards.hidden; gFood.hidden = true; gCards.hidden = true; if (!POOL.hidden) POOL.close(); if (wasCards) T.closedAt = performance.now(); if (T.state === 'bet' && (T.bet || T.pp)) { setFish(fishballs + T.bet + T.pp); T.bet = 0; T.pp = 0; vis.circle = 0; vis.pp = 0; } if (wasOpen) actBtn.focus({ preventScroll: true }); }
   document.querySelectorAll('[data-close-game]').forEach(b => b.addEventListener('click', closeGames));
   window.addEventListener('keydown', (e) => {
     if (!gameOpen()) return;
     if (e.key === 'Escape') { closeGames(); return; }
     if (!gCards.hidden && !e.target.closest('button')) {
-      if (e.key === 'h' || e.key === 'H') doHit(); if (e.key === 's' || e.key === 'S') doStand(); if (e.key === 'd' || e.key === 'D') { if (T.state === 'player') doDouble(); else doDeal(); } if (e.key === '+' || e.key === '=') addBall(); if (e.key === '-') takeBall(); if (e.key === 'p' || e.key === 'P') doSplit(); if (e.key === 'i' || e.key === 'I') insure(true); if ((e.key === 'c' || e.key === 'C') && T.state === 'cut') doCut(rand(0.3, 0.7)); if (e.key === 'n' || e.key === 'N') insure(false);
+      if (e.key === 'h' || e.key === 'H') doHit(); if (e.key === 's' || e.key === 'S') doStand(); if (e.key === 'd' || e.key === 'D') { if (T.state === 'player') doDouble(); else doDeal(); } if (e.key === '+' || e.key === '=') addBall(); if (e.key === '-') takeBall(); if (e.key === 'p' || e.key === 'P') doSplit(); if (e.key === 'i' || e.key === 'I') insure(true); if ((e.key === 'c' || e.key === 'C') && T.state === 'cut') doCut(rand(0.3, 0.7)); if (e.key === 'n' || e.key === 'N') insure(false); if (e.key === 'q' || e.key === 'Q') addPP(); if (e.key === 'r' || e.key === 'R') rebet(); if (e.key === 'a' || e.key === 'A') allIn(); if (e.key === 'x' || e.key === 'X') clearPP();
     }
     if (!gFood.hidden && !e.target.closest('button')) {
       if (e.key === ' ' || e.key === 'Enter' || e.key === 't' || e.key === 'T') { e.preventDefault(); tusokNext(); }
