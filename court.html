@@ -1975,8 +1975,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
     ctx.fillStyle = '#9aa3b2'; ctx.beginPath(); ctx.arc(196, 314, 2.5, 0, 7); ctx.arc(262, 314, 2.5, 0, 7); ctx.fill();
     // lettering
     ctx.font = `15px ${DISPLAY}`; ctx.textAlign = 'center';
-    ctx.fillStyle = '#d6332a'; ctx.fillText('MABUHAY', 182, 273);
-    ctx.fillStyle = '#ffe27a'; ctx.fillText('MABUHAY', 180, 271);
+    ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#b8261f'; ctx.strokeText('MABUHAY', 181, 272); ctx.lineWidth = 1.2; ctx.strokeStyle = OL; ctx.strokeText('MABUHAY', 181, 272); ctx.fillStyle = '#ffe27a'; ctx.fillText('MABUHAY', 181, 272);
     // weathering
     ctx.fillStyle = 'rgba(200,184,165,.35)'; ctx.fillRect(mx, my, mw, 3); ctx.fillRect(150, 318, 30, 8); ctx.fillRect(240, 248, 40, 5);
 
@@ -2210,27 +2209,17 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
     };
     chair(218); chair(250);
     if (tito.seated) {
-      const cheer = titoCheer > 0;
-      const bob = cheer && !reduceMotion ? Math.round(Math.abs(Math.sin(time * 14)) * 1.5) * 2 : 0;
-      const tx = CHAIR_X, by = GROUND - 18 - bob;
-      const blk = (x, y, w, h, col) => rr(x, y, w, h, Math.min(4, w / 2, h / 2), col);
-      blk(tx - 6, by - 2, 16, 6, '#b9a888');            // lap (khakis)
-      blk(tx + 6, by + 2, 4, 14, '#b9a888');            // shin
-      blk(tx - 8, by - 24, 16, 22, '#8fc3ea');          // light-blue quarter-zip
-      blk(tx - 8, by - 21, 11, 19, '#6b4a33');          // brown puffer vest
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(tx + 2, by - 25, 5, 3);   // collar
-      blk(tx - 6, by - 38, 12, 12, '#b9825a');          // head
-      ctx.fillStyle = '#1d1c22'; ctx.fillRect(tx - 7, by - 41, 14, 5); ctx.fillRect(tx + 3, by - 37, 7, 2);   // black cap and brim
-      ctx.fillStyle = '#141114'; ctx.fillRect(tx - 6, by - 36, 2, 4);   // sideburn
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(tx + 1, by - 35, 3, 3); ctx.fillStyle = OL; ctx.fillRect(tx + 2, by - 34, 2, 2);   // wide eye
-      ctx.fillStyle = 'rgba(70,60,60,.2)'; ctx.fillRect(tx, by - 30, 6, 3);   // stubble
-      ctx.strokeStyle = '#8fc3ea'; ctx.lineCap = 'round';
-      if (cheer) { limb(tx - 6, by - 22, tx - 10, by - 38); limb(tx + 6, by - 22, tx + 10, by - 38); }
-      else { limb(tx - 6, by - 20, tx - 6, by - 8); limb(tx + 6, by - 20, tx + 8, by - 8); }
-      ctx.lineCap = 'butt';
-      blk(tx + 6, GROUND - 2, 8, 2, '#5a4636');         // shoes
+      const cheer = titoCheer > 0, bob = cheer && !reduceMotion ? Math.abs(Math.sin(time * 14)) * 3 : 0;
+      // the rig's sit pose puts the hips about a sixth of his height above where his feet would stand
+      const H = 68 * ((LOOKS.tito && LOOKS.tito.scale) || 1);
+      CHARS.draw(ctx, 'randy', cheer ? 'cheer' : 'sit', 0, CHAIR_X + 4, GROUND - 11 - bob + H * 0.16, H, 1, { t: time });
     }
-    ctx.fillStyle = '#2f6fd6'; ctx.fillRect(186, GROUND + 6, 10, 4); ctx.fillRect(198, GROUND + 8, 10, 4);
+    for (const [sx, sy, a] of [[190, GROUND + 7, -0.25], [203, GROUND + 9, 0.15]]) {
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(a);
+      ctx.fillStyle = '#2f6fd6'; ctx.strokeStyle = OL; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.ellipse(0, 0, 6.5, 2.6, 0, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#f4f1ea'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(-3.5, -1.4); ctx.lineTo(1, 0.4); ctx.lineTo(-3.5, 1.6); ctx.stroke();
+      ctx.restore();
+    }
   }
 
   function drawBubble() {
@@ -2878,13 +2867,23 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
       else if (act === 'cards') Q.aN = [0.95, 1.25];
       else if (act === 'throw') { const k = (Math.sin(t * 3) + 1) / 2; Q.aN = [3.4 - k * 1.6, 1.1 - k]; }
       else if (act === 'point') { Q.aN = [1.55, 0.05]; }
+      else if (act === 'drive') { Q.aN = [1.25, 0.35]; Q.aF = [1.15, 0.4]; }   // both hands out on the handlebars
+      else if (act === 'pole') { Q.aN = [2.75, 1.75]; Q.aF = [2.95, 1.6]; }   // hands up on a shoulder pole
+      if (P.aN) Q.aN = P.aN; if (P.aF) Q.aF = P.aF; if (P.lN) Q.lN = P.lN; if (P.lF) Q.lF = P.lF;
       if (P.shadow === false) Q.shadowOff = true;
       const inv = c.getTransform().inverse();
       c.save(); c.translate(x, y); c.scale(f * s, s);
       const raw = RIG.draw(c, look(P), Q, { t, shadow: P.shadow });
       c.restore();
       const bk = (p) => { const q = inv.transformPoint({ x: p[0], y: p[1] }); return [q.x, q.y]; };
-      const hd = { near: bk(raw.near), far: bk(raw.far) };
+      const hd = { near: bk(raw.near), far: bk(raw.far), head: raw.head ? bk(raw.head) : null };
+      if (P.salakot && hd.head) {
+        const [qx, qy] = hd.head; c.save(); c.translate(qx, qy); c.scale(f * s, s);
+        c.fillStyle = '#d9c08a'; c.strokeStyle = '#1b1722'; c.lineWidth = 2.2; c.lineJoin = 'round';
+        c.beginPath(); c.moveTo(-31, -10); c.quadraticCurveTo(1, -20, 33, -10); c.lineTo(1, -42); c.closePath(); c.fill(); c.stroke();
+        c.strokeStyle = 'rgba(120,90,40,.55)'; c.lineWidth = 1.2; for (const k of [-0.5, 0, 0.5]) { c.beginPath(); c.moveTo(1, -40); c.lineTo(1 + k * 30, -13); c.stroke(); }
+        c.restore();
+      }
       // things in hand
       const [hx, hy] = hd.near;
       c.save(); c.lineWidth = 1.2; c.strokeStyle = '#1b1722';
@@ -2895,8 +2894,9 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
       c.restore();
       return hd;
     }
+    function headAt(c, x, y, k, P, t, f = 1) { c.save(); c.translate(x, y); c.scale(k * f, k); c.translate(-1, 17); RIG.drawHead(c, look(P), { blink: false, mouth: P.mouth || 'smile' }, t || 0); c.restore(); }
     function head(c, P, hy, t) { c.save(); c.translate(0, hy + 15); RIG.drawHead(c, look(P), { blink: false, mouth: 'smile' }, t || 0); c.restore(); }
-    return { draw, head };
+    return { draw, head, headAt };
   })();
 
   // R.J., Han and Tito Randy on the court are their sprite sheets

@@ -164,6 +164,7 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); c
         case 'crouch': P.lN = [0.95, 1.9]; P.lF = [0.8, 1.8]; P.aN = [0.9, 0.7]; P.aF = [0.8, 0.7]; P.lean = 0.3; break;
         case 'sit': P.lN = [1.48, 1.48]; P.lF = [1.42, 1.42]; P.aN = [0.55, 0.75]; P.aF = [0.45, 0.8]; P.sit = true; break;
         case 'ready': P.lN = [0.62, 1.05]; P.lF = [0.48, 0.95]; P.aN = [0.85, 0.35]; P.aF = [0.75, 0.35]; P.lean = 0.22; break;
+        case 'dive': P.lN = [-0.22, 0.2]; P.lF = [0.06, 0.4]; P.aN = [2.95, 0.05]; P.aF = [3.2, 0.12]; break;   // a lay-out: arms overhead, body straight (tipped over by the caller)
         case 'bump': P.lN = [0.72, 1.25]; P.lF = [0.6, 1.15]; P.aN = [1.12, 0]; P.aF = [1.08, 0]; P.lean = 0.3; break;
         case 'set': P.lN = [0.2, 0.35]; P.lF = [0.1, 0.3]; P.aN = [4.15, -0.55]; P.aF = [2.45, 0.4]; P.tilt = -0.15; break;
         case 'toss': P.aF = [2.45, 0.4]; P.aN = [0.25, 0.3]; P.tilt = -0.1; break;
@@ -472,13 +473,23 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); c
       else if (act === 'cards') Q.aN = [0.95, 1.25];
       else if (act === 'throw') { const k = (Math.sin(t * 3) + 1) / 2; Q.aN = [3.4 - k * 1.6, 1.1 - k]; }
       else if (act === 'point') { Q.aN = [1.55, 0.05]; }
+      else if (act === 'drive') { Q.aN = [1.25, 0.35]; Q.aF = [1.15, 0.4]; }   // both hands out on the handlebars
+      else if (act === 'pole') { Q.aN = [2.75, 1.75]; Q.aF = [2.95, 1.6]; }   // hands up on a shoulder pole
+      if (P.aN) Q.aN = P.aN; if (P.aF) Q.aF = P.aF; if (P.lN) Q.lN = P.lN; if (P.lF) Q.lF = P.lF;
       if (P.shadow === false) Q.shadowOff = true;
       const inv = c.getTransform().inverse();
       c.save(); c.translate(x, y); c.scale(f * s, s);
       const raw = RIG.draw(c, look(P), Q, { t, shadow: P.shadow });
       c.restore();
       const bk = (p) => { const q = inv.transformPoint({ x: p[0], y: p[1] }); return [q.x, q.y]; };
-      const hd = { near: bk(raw.near), far: bk(raw.far) };
+      const hd = { near: bk(raw.near), far: bk(raw.far), head: raw.head ? bk(raw.head) : null };
+      if (P.salakot && hd.head) {
+        const [qx, qy] = hd.head; c.save(); c.translate(qx, qy); c.scale(f * s, s);
+        c.fillStyle = '#d9c08a'; c.strokeStyle = '#1b1722'; c.lineWidth = 2.2; c.lineJoin = 'round';
+        c.beginPath(); c.moveTo(-31, -10); c.quadraticCurveTo(1, -20, 33, -10); c.lineTo(1, -42); c.closePath(); c.fill(); c.stroke();
+        c.strokeStyle = 'rgba(120,90,40,.55)'; c.lineWidth = 1.2; for (const k of [-0.5, 0, 0.5]) { c.beginPath(); c.moveTo(1, -40); c.lineTo(1 + k * 30, -13); c.stroke(); }
+        c.restore();
+      }
       // things in hand
       const [hx, hy] = hd.near;
       c.save(); c.lineWidth = 1.2; c.strokeStyle = '#1b1722';
@@ -489,8 +500,9 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); c
       c.restore();
       return hd;
     }
+    function headAt(c, x, y, k, P, t, f = 1) { c.save(); c.translate(x, y); c.scale(k * f, k); c.translate(-1, 17); RIG.drawHead(c, look(P), { blink: false, mouth: P.mouth || 'smile' }, t || 0); c.restore(); }
     function head(c, P, hy, t) { c.save(); c.translate(0, hy + 15); RIG.drawHead(c, look(P), { blink: false, mouth: 'smile' }, t || 0); c.restore(); }
-    return { draw, head };
+    return { draw, head, headAt };
   })();
 
   // R.J., side view: feet at (x, y), h tall. dir 1 faces right. ph drives the walk cycle; still = standing.
@@ -550,33 +562,52 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); c
   }
 
   // ---------- 1. the jeepney ride into Taguig ----------
+  // the same red R.J. Express as on campus: chrome hood and horses, cream roof and route board, chibi riders in the windows
+  const RIDERS = [
+    { skin: '#c08a5e', hair: '#16121c', hairStyle: 'short', shirt: '#2f6fd6' },
+    { skin: '#d9a37a', hair: '#2a1a12', hairStyle: 'long', shirt: '#e86aa6' },
+    { skin: '#8d5a3b', hair: '#16121c', hairStyle: 'short', cap: '#d6332a', shirt: '#f6c343' },
+    { skin: '#a8714c', hair: '#cfcfcf', hairStyle: 'bun', shirt: '#7a4e9a' },
+    { skin: '#6b4329', hair: '#16121c', hairStyle: 'pony', shirt: '#3fb26a' },
+    { skin: '#c08a5e', hair: '#3b2a1a', hairStyle: 'short', shirt: '#f4ece0' },
+  ];
   function drawJeep(x, y, L, wheelA, pitch, dust) {
     const s = L / 100; c.save(); c.translate(x + 34 * s, y); c.rotate(pitch); c.translate(-34 * s, 0); c.scale(s, s); c.lineJoin = 'round';
-    const lw = 2.2 / s * 1.2;
+    const lw = 2.2 / s * 1.2, tt = performance.now() / 1000;
     // shadow
     c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(0, 1, 56, 3.2, 0, 0, 7); c.fill();
-    // roof with the route board
-    rr(-54, -48, 86, 6, 2, '#d9dee6', lw); rr(-34, -57, 50, 10, 2, '#f6c343', lw);
-    c.fillStyle = '#d6332a'; c.font = `7px ${DISP}`; c.textAlign = 'center'; c.fillText('TAGUIG', -9, -49.4, 46);
-    // the body: chrome, painted stripes
-    c.beginPath(); c.moveTo(-52, -42); c.lineTo(28, -42); c.lineTo(32, -26); c.lineTo(50, -24); c.quadraticCurveTo(53, -23, 53, -18); c.lineTo(53, -8); c.lineTo(-54, -8); c.lineTo(-54, -40); c.closePath();
-    const bg = c.createLinearGradient(0, -42, 0, -8); bg.addColorStop(0, '#f2f4f7'); bg.addColorStop(0.5, '#c9ced6'); bg.addColorStop(1, '#9aa2ad'); c.fillStyle = bg; c.fill(); c.lineWidth = lw; c.strokeStyle = OL; c.stroke();
-    c.fillStyle = '#d6332a'; c.fillRect(-53, -19, 105, 3); c.fillStyle = '#f6c343'; c.fillRect(-53, -16, 105, 2); c.fillStyle = '#2f6fd6'; c.fillRect(-53, -14, 105, 2.4);
-    // windows with passengers
+    // cream roof with a rack, and the route board
+    rr(-56, -48, 86, 6, 2, '#e8e2d0', lw);
+    c.fillStyle = '#c4c9d2'; for (let rx = -50; rx < 26; rx += 9) c.fillRect(rx, -51, 1.2, 3); c.fillRect(-52, -51.5, 76, 1.2);
+    rr(-34, -60, 46, 10, 2, '#fbf6e8', lw); c.fillStyle = '#d6332a'; c.font = `7px ${DISP}`; c.textAlign = 'center'; c.fillText('TAGUIG', -11, -52.5, 42);
+    // the cabin: red, with the stripes and the name
+    rr(-54, -42, 82, 34, 2.5, '#d6332a', lw);
+    c.fillStyle = '#2b2238'; c.fillRect(-50, -38.5, 74, 13);
+    c.save(); c.beginPath(); c.rect(-50, -38.5, 74, 13); c.clip();
     for (let i = 0; i < 6; i++) {
-      const wx = -50 + i * 12.5; rr(wx, -38, 10, 13, 1.5, '#2a2236', lw * 0.6);
-      if (hash(i * 3.3) > 0.25) { c.fillStyle = ['#c08a5e', '#9a6a48', '#d9a07a'][i % 3]; c.beginPath(); c.arc(wx + 5, -29, 3, 0, 7); c.fill(); c.fillStyle = '#141015'; c.beginPath(); c.arc(wx + 5, -30.5, 3, Math.PI, 0); c.fill(); }
+      const wx = -44 + i * 12.4, P = RIDERS[i], bob = Math.abs(Math.sin(tt * 9 + i)) * 0.5;
+      c.fillStyle = P.shirt; c.beginPath(); c.ellipse(wx, -25.5, 5.4, 3.4, 0, 0, 7); c.fill(); c.lineWidth = 0.7; c.strokeStyle = OL; c.stroke();
+      CHIBI.headAt(c, wx, -31 + bob, 0.21, P, tt + i, i % 3 === 2 ? -1 : 1);
     }
-    // windshield and driver
-    c.beginPath(); c.moveTo(26, -38); c.lineTo(30, -27); c.lineTo(22, -27); c.lineTo(22, -38); c.closePath(); c.fillStyle = '#9fd3ff'; c.fill(); c.strokeStyle = OL; c.lineWidth = lw * 0.6; c.stroke();
-    c.fillStyle = '#9a6a48'; c.beginPath(); c.arc(24, -31, 2.6, 0, 7); c.fill();
-    // hood ornaments: two chrome horses (well, horse-ish), headlights, grille, bumper
-    for (const hx of [38, 44]) { c.fillStyle = '#eef1f4'; c.beginPath(); c.moveTo(hx, -24); c.lineTo(hx + 1, -31); c.lineTo(hx + 4, -32); c.lineTo(hx + 3, -28); c.lineTo(hx + 4, -24); c.closePath(); c.fill(); c.strokeStyle = OL; c.lineWidth = 0.8; c.stroke(); }
-    c.fillStyle = '#fff6c9'; c.beginPath(); c.arc(51, -17, 2.2, 0, 7); c.fill(); c.stroke();
-    rr(48, -13, 7, 4, 1, '#b8bec8', lw * 0.5); rr(-56, -10, 6, 3, 1, '#b8bec8', lw * 0.5);
-    c.fillStyle = '#16121c'; c.fillRect(-58, -6, 3, 2);   // tailpipe
+    c.restore();
+    c.fillStyle = '#d6332a'; for (let px = -50; px < 24; px += 12.4) c.fillRect(px - 1, -38.5, 2, 13);
+    c.fillStyle = '#f6c343'; c.fillRect(-53, -24.5, 80, 2.6); c.fillStyle = '#2f6fd6'; c.fillRect(-53, -21.4, 80, 2); c.fillStyle = '#f4ece0'; c.fillRect(-53, -19, 80, 1);
+    c.font = `6px ${DISP}`; c.lineWidth = 1.6; c.strokeStyle = OL; c.strokeText('R.J. EXPRESS', -4, -10.5); c.fillStyle = '#ffe27a'; c.fillText('R.J. EXPRESS', -4, -10.5);
+    c.fillStyle = '#f6c343'; for (const sx of [-46, 20]) { c.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 1.3 : 3, a = -Math.PI / 2 + i * Math.PI / 5; c.lineTo(sx + Math.cos(a) * r, -12.5 + Math.sin(a) * r); } c.fill(); }
+    // windshield with the driver
+    c.beginPath(); c.moveTo(24, -40); c.lineTo(31, -27); c.lineTo(24, -27); c.closePath(); c.fillStyle = '#9fd3ff'; c.fill(); c.lineWidth = lw * 0.6; c.strokeStyle = OL; c.stroke();
+    c.save(); c.beginPath(); c.moveTo(24, -40); c.lineTo(31, -27); c.lineTo(24, -27); c.closePath(); c.clip(); CHIBI.headAt(c, 25.5, -32, 0.2, { skin: '#8d5a3b', hair: '#16121c', hairStyle: 'short' }, tt, 1); c.restore();
+    // chrome hood, grille, headlight, horses, bumper
+    c.beginPath(); c.moveTo(27, -8); c.lineTo(27, -27); c.lineTo(48, -26); c.quadraticCurveTo(54, -25, 54, -19); c.lineTo(54, -8); c.closePath();
+    const hg = c.createLinearGradient(0, -27, 0, -8); hg.addColorStop(0, '#f4f7fb'); hg.addColorStop(0.45, '#b9c2cf'); hg.addColorStop(0.55, '#8d96a6'); hg.addColorStop(1, '#dfe6ef'); c.fillStyle = hg; c.fill(); c.lineWidth = lw; c.strokeStyle = OL; c.stroke();
+    c.fillStyle = '#2a2a33'; c.fillRect(49.5, -22, 3.5, 10); c.fillStyle = '#d5dbe4'; for (let gy = -21; gy < -12; gy += 2) c.fillRect(49.5, gy, 3.5, 0.7);
+    c.fillStyle = '#fff6c9'; c.beginPath(); c.arc(46, -19, 2.2, 0, 7); c.fill(); c.lineWidth = lw * 0.5; c.stroke();
+    for (const hx of [33, 40]) { c.fillStyle = '#eef1f4'; c.beginPath(); c.moveTo(hx, -27); c.lineTo(hx + 1, -33); c.lineTo(hx + 4, -34); c.lineTo(hx + 3, -30); c.lineTo(hx + 4, -27); c.closePath(); c.fill(); c.strokeStyle = OL; c.lineWidth = lw * 0.4; c.stroke(); }
+    rr(48, -10, 9, 3.5, 1, '#dfe6ef', lw * 0.5); rr(-58, -10, 6, 3, 1, '#b8bec8', lw * 0.5);
+    c.fillStyle = '#16121c'; c.fillRect(-60, -6, 3, 2);   // tailpipe
     // wheels
     for (const wx of [-34, 34]) {
+      c.fillStyle = '#1a1520'; c.beginPath(); c.arc(wx, -4, 10, Math.PI, 0); c.fill();
       c.save(); c.translate(wx, -4); c.beginPath(); c.arc(0, 0, 8, 0, 7); c.fillStyle = '#1b1a1f'; c.fill(); c.lineWidth = lw; c.strokeStyle = OL; c.stroke();
       c.beginPath(); c.arc(0, 0, 4.4, 0, 7); c.fillStyle = '#c9ced6'; c.fill(); c.rotate(wheelA); c.strokeStyle = '#6c7380'; c.lineWidth = 1.1;
       for (let k = 0; k < 5; k++) { c.rotate(1.2566); c.beginPath(); c.moveTo(0, 0); c.lineTo(4.2, 0); c.stroke(); }
@@ -668,14 +699,46 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); c
     // stains, a pipe, windows, a door, laundry: placed along the alley and scrolled
     const span = Math.max(W * 1.3, 900);
     for (let k = -1; k < 3; k++) {
-      const o = k * span - (off % span);
-      c.fillStyle = 'rgba(60,52,50,.18)'; c.fillRect(o + span * 0.1, H * 0.1, 30, gY - H * 0.1);
-      const wx = o + span * 0.22, wy = H * 0.3; c.fillStyle = '#ffd889'; c.fillRect(wx, wy, 70, 56); c.strokeStyle = '#2a2236'; c.lineWidth = 2; for (let i = 1; i < 5; i++) { c.beginPath(); c.moveTo(wx + i * 14, wy); c.lineTo(wx + i * 14, wy + 56); c.stroke(); } c.strokeStyle = OL; c.lineWidth = 2.5; c.strokeRect(wx, wy, 70, 56);
-      c.fillStyle = '#5a6270'; c.fillRect(o + span * 0.47, H * 0.1, 8, gY - H * 0.1); c.fillRect(o + span * 0.47 - 6, H * 0.45, 20, 6);
-      rr(o + span * 0.62, gY - H * 0.32, H * 0.15, H * 0.32, 2, '#4a5d4f', 2.5);
-      c.strokeStyle = '#3a3440'; c.lineWidth = 1.2; const lx0 = o + span * 0.05, lx1 = o + span * 0.95, ly = H * 0.22; c.beginPath(); c.moveTo(lx0, ly); c.quadraticCurveTo((lx0 + lx1) / 2, ly + 14, lx1, ly); c.stroke();
-      const cols = ['#d6332a', '#f4ece0', '#2f6fd6', '#f6c343', '#3fb26a', '#e86aa6'];
-      for (let i = 0; i < 9; i++) { const x = lx0 + (i + 0.5) * (lx1 - lx0) / 9, yy = ly + 14 * (1 - Math.pow((x - (lx0 + lx1) / 2) / ((lx1 - lx0) / 2), 2)) * 0.75; c.fillStyle = cols[(i + k * 2 + 6) % 6]; c.fillRect(x - 9, yy, 18, 22 + (i % 3) * 5); c.strokeStyle = OL; c.lineWidth = 1; c.strokeRect(x - 9, yy, 18, 22 + (i % 3) * 5); }
+      const o = k * span - (off % span), top = H * 0.1, wallH = gY - top;
+      // a long rain streak down the blocks
+      const sg = c.createLinearGradient(0, top, 0, gY); sg.addColorStop(0, 'rgba(60,52,50,.22)'); sg.addColorStop(1, 'rgba(60,52,50,0)');
+      c.fillStyle = sg; c.beginPath(); c.moveTo(o + span * 0.1, top); c.quadraticCurveTo(o + span * 0.1 + 26, top + wallH * 0.5, o + span * 0.1 + 10, gY - wallH * 0.15); c.lineTo(o + span * 0.1 - 6, top + wallH * 0.4); c.closePath(); c.fill();
+      // a lit window with a frame, a sill, an iron grille and a little flower box
+      const wx = o + span * 0.22, wy = H * 0.3, ww = Math.max(80, H * 0.17), wh = ww * 0.8;
+      const wl = c.createLinearGradient(wx, wy, wx, wy + wh); wl.addColorStop(0, '#ffe7a8'); wl.addColorStop(1, '#ffc766');
+      rr(wx - 5, wy - 5, ww + 10, wh + 10, 3, '#cfc6b8', 2.4); rr(wx, wy, ww, wh, 2, null, 0); c.fillStyle = wl; c.fill();
+      c.fillStyle = 'rgba(214,51,42,.55)'; c.fillRect(wx, wy, ww * 0.22, wh); c.fillRect(wx + ww * 0.78, wy, ww * 0.22, wh);   // curtains
+      c.strokeStyle = '#2a2236'; c.lineWidth = 2.2; for (let i = 1; i < 5; i++) { c.beginPath(); c.moveTo(wx + i * ww / 5, wy); c.lineTo(wx + i * ww / 5, wy + wh); c.stroke(); } c.beginPath(); c.moveTo(wx, wy + wh / 2); c.lineTo(wx + ww, wy + wh / 2); c.stroke();
+      rr(wx - 9, wy + wh + 4, ww + 18, 6, 2, '#e3dccf', 2);
+      rr(wx + 4, wy + wh + 10, ww - 8, 10, 2, '#a35a3a', 2);
+      for (let i = 0; i < 5; i++) { const fx = wx + 10 + i * (ww - 20) / 4; c.fillStyle = '#3f8a52'; c.beginPath(); c.ellipse(fx, wy + wh + 8, 5, 3, -0.4 + i * 0.2, 0, 7); c.fill(); c.lineWidth = 1.2; c.strokeStyle = OL; c.stroke(); c.fillStyle = ['#e86aa6', '#f6c343', '#f4ece0'][i % 3]; c.beginPath(); c.arc(fx + 2, wy + wh + 4, 2.6, 0, 7); c.fill(); c.stroke(); }
+      // a drainpipe with brackets and an elbow at the bottom
+      const px = o + span * 0.47;
+      rr(px, top - 4, 9, gY - top - 10, 3, '#6d7684', 2.2); for (const by of [0.25, 0.55, 0.8]) rr(px - 3, top + wallH * by, 15, 4, 1, '#4e5662', 1.6);
+      rr(px - 1, gY - 16, 22, 9, 3, '#6d7684', 2.2);
+      // a door: frame, panels, knob, a house number, a step
+      const dx = o + span * 0.62, dh = H * 0.32, dw = dh * 0.47, dy = gY - dh;
+      rr(dx - 6, dy - 6, dw + 12, dh + 6, 2, '#d8cfc0', 2.4); rr(dx, dy, dw, dh, 2, '#4a6a52', 2.4);
+      for (const [py, ph] of [[0.08, 0.36], [0.52, 0.4]]) rr(dx + dw * 0.14, dy + dh * py, dw * 0.72, dh * ph, 2, '#3e5b45', 1.6);
+      c.fillStyle = '#f6c343'; c.beginPath(); c.arc(dx + dw * 0.82, dy + dh * 0.52, 3, 0, 7); c.fill(); c.lineWidth = 1.4; c.strokeStyle = OL; c.stroke();
+      rr(dx + dw * 0.3, dy - 22, dw * 0.4, 13, 2, '#f4ece0', 1.6); c.fillStyle = '#2f6fd6'; c.font = `10px ${DISP}`; c.textAlign = 'center'; c.fillText(String(12 + k * 7), dx + dw * 0.5, dy - 12);
+      rr(dx - 10, gY - 5, dw + 20, 5, 1, '#bdb4a6', 1.6);
+      // a clothesline: real laundry on pegs
+      c.strokeStyle = '#3a3440'; c.lineWidth = 1.2; const lx0 = o + span * 0.05, lx1 = o + span * 0.95, ly = H * 0.2;
+      c.beginPath(); c.moveTo(lx0, ly); c.quadraticCurveTo((lx0 + lx1) / 2, ly + 14, lx1, ly); c.stroke();
+      const cols = ['#d6332a', '#f4ece0', '#2f6fd6', '#f6c343', '#3fb26a', '#e86aa6'], sz = Math.max(20, H * 0.05);
+      for (let i = 0; i < 9; i++) {
+        const lx = lx0 + (i + 0.5) * (lx1 - lx0) / 9, yy = ly + 14 * (1 - Math.pow((lx - (lx0 + lx1) / 2) / ((lx1 - lx0) / 2), 2)) * 0.75, col = cols[(i + k * 2 + 6) % 6], kind = (i + k) % 4;
+        c.save(); c.translate(lx, yy); c.rotate(Math.sin(performance.now() / 700 + i) * 0.05); c.fillStyle = col; c.strokeStyle = OL; c.lineWidth = 1.6; c.beginPath();
+        if (kind === 0) { c.moveTo(-sz * 0.5, 0); c.lineTo(-sz * 0.95, sz * 0.35); c.lineTo(-sz * 0.7, sz * 0.6); c.lineTo(-sz * 0.48, sz * 0.45); c.lineTo(-sz * 0.48, sz * 1.3); c.lineTo(sz * 0.48, sz * 1.3); c.lineTo(sz * 0.48, sz * 0.45); c.lineTo(sz * 0.7, sz * 0.6); c.lineTo(sz * 0.95, sz * 0.35); c.lineTo(sz * 0.5, 0); c.quadraticCurveTo(0, sz * 0.25, -sz * 0.5, 0); }   // a tee
+        else if (kind === 1) { c.moveTo(-sz * 0.55, 0); c.lineTo(sz * 0.55, 0); c.lineTo(sz * 0.6, sz * 0.95); c.lineTo(sz * 0.08, sz * 0.95); c.lineTo(0, sz * 0.35); c.lineTo(-sz * 0.08, sz * 0.95); c.lineTo(-sz * 0.6, sz * 0.95); c.closePath(); }   // shorts
+        else if (kind === 2) { c.roundRect(-sz * 0.45, 0, sz * 0.9, sz * 1.5, 2); }   // a towel
+        else { c.moveTo(-sz * 0.15, 0); c.lineTo(sz * 0.15, 0); c.lineTo(sz * 0.15, sz * 0.7); c.quadraticCurveTo(sz * 0.5, sz * 0.75, sz * 0.45, sz * 0.95); c.lineTo(-sz * 0.15, sz * 0.95); c.closePath(); }   // a sock
+        c.fill(); c.stroke();
+        if (kind === 2) { c.fillStyle = 'rgba(255,255,255,.5)'; c.fillRect(-sz * 0.45, sz * 1.2, sz * 0.9, sz * 0.12); }
+        c.fillStyle = '#c9a36a'; c.fillRect(-sz * 0.3 - 1.5, -3, 3, 6); c.fillRect(sz * 0.3 - 1.5, -3, 3, 6);   // pegs
+        c.restore();
+      }
     }
     // the light from the court at the far end
     const gx = toward > 0 ? W : 0, gl = c.createRadialGradient(gx, H * 0.5, 10, gx, H * 0.5, W * 0.55); gl.addColorStop(0, 'rgba(255,236,170,.55)'); gl.addColorStop(1, 'rgba(255,236,170,0)'); c.fillStyle = gl; c.fillRect(0, 0, W, H);
@@ -684,11 +747,20 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); c
     c.strokeStyle = 'rgba(40,36,40,.3)'; c.lineWidth = 1.5; for (let x = -(scroll % 140); x < W; x += 140) { c.beginPath(); c.moveTo(x, gY + 4); c.lineTo(x - 30, H); c.stroke(); }
     return gY;
   }
-  function frontJunk(scroll) {   // potted plants and a drum in front of everything, moving fastest
+  function frontJunk(scroll) {   // a water drum and a potted plant in front of everything, moving fastest
     const span = Math.max(W * 0.9, 700), off = (scroll * 1.25) % span, y = H;
     for (let o = -off; o < W + span; o += span) {
-      c.fillStyle = '#2f3a8a'; rr(o + span * 0.15, y - H * 0.11, H * 0.08, H * 0.14, 4, '#2f5fb8', 2.5);
-      rr(o + span * 0.7, y - H * 0.06, H * 0.07, H * 0.08, 3, '#a35a3a', 2.5); c.fillStyle = '#3f8a52'; c.beginPath(); c.arc(o + span * 0.7 + H * 0.035, y - H * 0.08, H * 0.05, 0, 7); c.fill();
+      // a blue plastic water drum with ribs and a lid
+      const dx = o + span * 0.15, dw = H * 0.1, dh = H * 0.15, dy = y - dh + H * 0.03;
+      rr(dx, dy, dw, dh, dw * 0.12, '#2f5fb8', 2.6);
+      c.strokeStyle = 'rgba(15,30,80,.45)'; c.lineWidth = 2; for (const r of [0.3, 0.62]) { c.beginPath(); c.moveTo(dx + 3, dy + dh * r); c.lineTo(dx + dw - 3, dy + dh * r); c.stroke(); }
+      c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(dx + dw * 0.14, dy + 6, dw * 0.12, dh - 12);
+      rr(dx - 3, dy - 6, dw + 6, 9, 3, '#244c96', 2.4);
+      // a terracotta pot with a leafy plant
+      const px = o + span * 0.7, pw = H * 0.08, ph = H * 0.08, py = y - ph + H * 0.02;
+      c.fillStyle = '#a35a3a'; c.beginPath(); c.moveTo(px, py); c.lineTo(px + pw, py); c.lineTo(px + pw * 0.86, py + ph); c.lineTo(px + pw * 0.14, py + ph); c.closePath(); c.fill(); c.lineWidth = 2.4; c.strokeStyle = OL; c.stroke();
+      rr(px - 4, py - 6, pw + 8, 9, 2, '#b8683f', 2.4);
+      for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + (i - 3) * 0.42, len = H * (0.06 + (i % 2) * 0.025); c.save(); c.translate(px + pw / 2, py - 4); c.rotate(a + Math.PI / 2); c.fillStyle = i % 2 ? '#3f8a52' : '#4fa564'; c.beginPath(); c.ellipse(0, -len / 2, len * 0.22, len / 2, 0, 0, 7); c.fill(); c.lineWidth = 2; c.strokeStyle = OL; c.stroke(); c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -len * 0.85); c.stroke(); c.restore(); }
     }
   }
   const BALL = {

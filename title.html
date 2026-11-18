@@ -732,9 +732,9 @@ body.exploring::before { opacity: 0; }
     rr(cx - 7, top - 58, 14, 18, 1, '#f4efe6', 1.2); ctx.fillStyle = '#4d6f6a'; ctx.beginPath(); ctx.moveTo(cx - 10, top - 58); ctx.lineTo(cx, top - 72); ctx.lineTo(cx + 10, top - 58); ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#3d5a7a'; ctx.fillRect(cx - 3, top - 54, 6, 10);
     // arched windows, three storeys
-    for (let f = 0; f < 3; f++) for (let k = 0; k < Math.floor(w / 30); k++) {
-      const wx = x0 + 10 + k * 30; if (Math.abs(wx + 7 - cx) < 40) continue;
-      archWindow(wx, top + 12 + f * 52, 15, 32);
+    for (let f = 0; f < 3; f++) for (const sd of [-1, 1]) for (let j = 0; ; j++) {
+      const wc = cx + sd * (50 + j * 28); if (Math.abs(wc - cx) + 7.5 > w / 2 - 8) break;
+      archWindow(wc - 7.5, top + 12 + f * 52, 15, 32);
     }
     archWindow(cx - 12, top + 10, 24, 38);
     // entrance: arch, doors, steps
@@ -761,8 +761,16 @@ body.exploring::before { opacity: 0; }
     ctx.fillStyle = '#e8ecef'; ctx.fillRect(x0 - 4, top - 6, w + 8, 7); ctx.fillRect(x0 - 2, base - 3, w + 4, 4);
     ctx.lineWidth = 1.6; ctx.strokeStyle = '#2b3b4c'; ctx.strokeRect(x0, top, w, FAR - top);
     // glass entry
-    ctx.fillStyle = '#2b4a6a'; ctx.fillRect(x0 + 20, FAR - 30, 34, 30); ctx.strokeStyle = '#e8ecef'; ctx.lineWidth = 1; ctx.strokeRect(x0 + 20, FAR - 30, 34, 30); ctx.beginPath(); ctx.moveTo(x0 + 37, FAR - 30); ctx.lineTo(x0 + 37, FAR); ctx.stroke();
-    ctx.fillStyle = '#ffffff'; ctx.font = `9px ${DISPLAY}`; ctx.textAlign = 'left'; ctx.fillText('SAAB ETIC', x0 + 62, base + 13);
+    { const dx = x0 + 20, dw = 36, dh = 38;
+      const dg = ctx.createLinearGradient(dx, FAR - dh, dx + dw, FAR); dg.addColorStop(0, '#9cc6e6'); dg.addColorStop(1, '#2f5578');
+      ctx.fillStyle = dg; ctx.fillRect(dx, FAR - dh, dw, dh); ctx.strokeStyle = '#e8ecef'; ctx.lineWidth = 2; ctx.strokeRect(dx, FAR - dh, dw, dh);
+      ctx.fillStyle = '#e8ecef'; ctx.fillRect(dx + 16.5, FAR - dh, 3, dh); ctx.fillStyle = '#c7cdd4'; ctx.fillRect(dx + 12, FAR - 22, 2, 9); ctx.fillRect(dx + 22, FAR - 22, 2, 9);
+      ctx.fillStyle = '#e8ecef'; ctx.fillRect(dx - 8, FAR - dh - 7, dw + 16, 5); ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(dx - 6, FAR - dh - 2, dw + 12, 3);
+      ctx.fillStyle = '#d9d0c0'; ctx.fillRect(dx - 6, FAR - 3, dw + 12, 3);
+      ctx.strokeStyle = 'rgba(0,0,0,0)'; }
+    if (false) { ctx.beginPath(); ctx.moveTo(x0 + 37, FAR - 30); ctx.lineTo(x0 + 37, FAR); ctx.stroke();
+    }
+    ctx.fillStyle = '#ffffff'; ctx.font = `9px ${DISPLAY}`; ctx.textAlign = 'left'; ctx.fillText('SAAB ETIC', x0 + 64, base + 13);
   }
   function drawHouses() {   // campus buildings along the street
     const v = V();
@@ -775,9 +783,10 @@ body.exploring::before { opacity: 0; }
     g.addColorStop(0, '#7dbb5e'); g.addColorStop(1, '#5fa04a');
     ctx.fillStyle = g; ctx.fillRect(v.x - 10, FAR, v.w + 20, SIDEWALK - FAR);
     ctx.fillStyle = '#c99a7f'; ctx.beginPath(); ctx.moveTo(130, FAR); ctx.lineTo(152, FAR); ctx.lineTo(176, SIDEWALK); ctx.lineTo(108, SIDEWALK); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#cfc8bd'; ctx.beginPath(); ctx.moveTo(284, FAR); ctx.lineTo(314, FAR); ctx.lineTo(326, SIDEWALK); ctx.lineTo(272, SIDEWALK); ctx.closePath(); ctx.fill();   // the walk up to ETIC
     ctx.fillStyle = '#3f7f3c';
-    for (let x = Math.floor((v.x - 20) / 14) * 14; x < v.x + v.w + 20; x += 14) { if (x > 96 && x < 186) continue; ctx.beginPath(); ctx.arc(x, SIDEWALK - 6, 9, Math.PI, 0); ctx.fill(); }
-    ctx.fillRect(v.x - 10, SIDEWALK - 6, v.w + 20, 6);
+    for (let x = Math.floor((v.x - 20) / 14) * 14; x < v.x + v.w + 20; x += 14) { if ((x > 96 && x < 186) || (x > 262 && x < 334)) continue; ctx.beginPath(); ctx.arc(x, SIDEWALK - 6, 9, Math.PI, 0); ctx.fill(); }
+    for (const [a, b] of [[v.x - 10, 100], [182, 266], [330, v.x + v.w + 10]]) if (b > a) ctx.fillRect(a, SIDEWALK - 6, b - a, 6);
   }
   // lampposts with River Hawks banners (~14 ft), street trees (~18 ft), the blue-light phone and the campus sign
   const LAMP_X = (k) => 236 + k * 490;
@@ -848,7 +857,6 @@ body.exploring::before { opacity: 0; }
       ctx.fillStyle = gg; ctx.fillRect(x0, 495, x1 - x0, bot - 495);
       ctx.fillStyle = '#3f7f3c'; for (let x = Math.floor(x0 / 18) * 18; x < x1; x += 18) { ctx.beginPath(); ctx.arc(x, 506, 12, Math.PI, 0); ctx.fill(); } ctx.fillRect(x0, 505, x1 - x0, bot - 505);
     }
-    ctx.fillStyle = 'rgba(255,255,255,.05)'; for (let i = 0; i < 6; i++) { const px = 120 + i * 140; ctx.fillRect(px, 380 + (i % 3) * 12, 40, 6); }
     for (const sk of skids) { ctx.strokeStyle = `rgba(20,18,22,${0.5 * sk.a})`; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(sk.x0, sk.y0); ctx.quadraticCurveTo(sk.cx, sk.cy, sk.x1, sk.y1); ctx.stroke(); }
   }
   let skids = [];
@@ -1018,6 +1026,13 @@ body.exploring::before { opacity: 0; }
   }
 
   // ---------- the jeepney ----------
+  const JEEP_FOLK = [
+    { skin: '#8d5a3b', hair: '#16121c', hairStyle: 'short', shirt: '#2f6fd6' },
+    { skin: '#d9a37a', hair: '#2a1a12', hairStyle: 'long', shirt: '#e86aa6' },
+    { skin: '#6b4329', hair: '#16121c', hairStyle: 'short', cap: '#d6332a', shirt: '#f6c343' },
+    { skin: '#c08a5e', hair: '#cfcfcf', hairStyle: 'bun', shirt: '#7a4e9a' },
+    { skin: '#a8714c', hair: '#16121c', hairStyle: 'pony', shirt: '#3fb26a' },
+  ];
   function drawJeepney(ox, oy, rot = 0, moving = false, sc = JS) {
     ctx.save(); ctx.translate(ox, oy); ctx.rotate(rot); ctx.scale(sc, sc);
     const L = 182;
@@ -1033,7 +1048,7 @@ body.exploring::before { opacity: 0; }
     // windows with passengers
     ctx.fillStyle = '#2b2238'; ctx.fillRect(52, -66, L - 62, 18);
     const heads = [['#8d5a3b', 0], ['#c08a5e', 1], ['#6b4329', 0], ['#a8714c', 2], ['#7a4e33', 1]];
-    heads.forEach(([sk, hr], i) => { const hx = 66 + i * 24 + (moving ? Math.sin(time * 18 + i) * 0.6 : 0); circ(hx, -55, 5, sk, 1); ctx.fillStyle = ['#16121c', '#3b2a1a', '#d0d0d0'][hr]; ctx.beginPath(); ctx.arc(hx, -56, 5, Math.PI, 0); ctx.fill(); });
+    ctx.save(); ctx.beginPath(); ctx.rect(52, -66, L - 62, 18); ctx.clip(); heads.forEach(([sk, hr], i) => { const hx = 66 + i * 24 + (moving ? Math.sin(time * 18 + i) * 0.6 : 0), P = JEEP_FOLK[i % JEEP_FOLK.length]; ctx.fillStyle = P.shirt; ctx.beginPath(); ctx.ellipse(hx, -46, 8, 5, 0, 0, 7); ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = OL; ctx.stroke(); CHIBI.headAt(ctx, hx, -54.5 + (moving ? Math.abs(Math.sin(time * 9 + i)) * 0.8 : 0), 0.3, P, time + i, i % 3 === 1 ? -1 : 1); }); ctx.restore(); if (false) heads.forEach(([sk, hr], i) => { });
     ctx.fillStyle = '#d6332a'; for (let x = 52; x < L - 8; x += 22) ctx.fillRect(x, -66, 3, 18);
     // paint job: stripes, stars, name
     ctx.fillStyle = '#f6c343'; ctx.fillRect(45, -46, L - 46, 4);
@@ -1074,18 +1089,8 @@ body.exploring::before { opacity: 0; }
     ctx.restore();
   }
   function drawBarker(x, y, wave) {
-    // the barker hangs off the rear pole
-    ctx.save(); ctx.translate(x, y); ctx.scale(1.22, 1.22);
-    ctx.strokeStyle = '#8d5a3b'; limb(-1, -42, -2, -66, 3.2);                 // arm on the pole
-    rr(-5, -44, 11, 20, 3, '#2f6fd6', 1.4);                                      // shirt
-    rr(-4, -25, 9, 12, 2, '#3a3a48', 1.2);                                       // shorts
-    ctx.strokeStyle = '#8d5a3b'; limb(-1, -14, -1, -3, 2.8); limb(3, -14, 6, -4, 2.8);
-    circ(1, -50, 6, '#8d5a3b', 1.4);
-    ctx.fillStyle = '#16121c'; ctx.beginPath(); ctx.arc(1, -51, 6, Math.PI, 0); ctx.fill();
-    rr(-6, -56, 14, 3, 1, '#d6332a', 0.8);                                        // cap
-    ctx.fillStyle = OL; ctx.fillRect(4, -51, 1.5, 1.5);
-    ctx.strokeStyle = '#8d5a3b'; limb(3, -40, 13 + Math.sin(wave) * 3, -54 - Math.cos(wave) * 3, 3);
-    ctx.restore();
+    // the barker hangs off the rear pole: far hand up on the pole, one foot on the step, waving you on
+    CHIBI.draw(ctx, x - 2, y, { s: 0.78, face: 1, skin: '#8d5a3b', shirt: '#2f6fd6', shorts: '#3a3a48', hair: '#16121c', cap: '#d6332a', sando: false, act: 'wave', aF: [3.15, 0.15], lN: [0.25, 0.35], lF: [0.75, 0.6], ph: 0.4 }, wave / 6);
   }
 
   // the jeepney seen head-on, centered on cx with its wheels on by
@@ -1688,13 +1693,23 @@ body.exploring::before { opacity: 0; }
       else if (act === 'cards') Q.aN = [0.95, 1.25];
       else if (act === 'throw') { const k = (Math.sin(t * 3) + 1) / 2; Q.aN = [3.4 - k * 1.6, 1.1 - k]; }
       else if (act === 'point') { Q.aN = [1.55, 0.05]; }
+      else if (act === 'drive') { Q.aN = [1.25, 0.35]; Q.aF = [1.15, 0.4]; }   // both hands out on the handlebars
+      else if (act === 'pole') { Q.aN = [2.75, 1.75]; Q.aF = [2.95, 1.6]; }   // hands up on a shoulder pole
+      if (P.aN) Q.aN = P.aN; if (P.aF) Q.aF = P.aF; if (P.lN) Q.lN = P.lN; if (P.lF) Q.lF = P.lF;
       if (P.shadow === false) Q.shadowOff = true;
       const inv = c.getTransform().inverse();
       c.save(); c.translate(x, y); c.scale(f * s, s);
       const raw = RIG.draw(c, look(P), Q, { t, shadow: P.shadow });
       c.restore();
       const bk = (p) => { const q = inv.transformPoint({ x: p[0], y: p[1] }); return [q.x, q.y]; };
-      const hd = { near: bk(raw.near), far: bk(raw.far) };
+      const hd = { near: bk(raw.near), far: bk(raw.far), head: raw.head ? bk(raw.head) : null };
+      if (P.salakot && hd.head) {
+        const [qx, qy] = hd.head; c.save(); c.translate(qx, qy); c.scale(f * s, s);
+        c.fillStyle = '#d9c08a'; c.strokeStyle = '#1b1722'; c.lineWidth = 2.2; c.lineJoin = 'round';
+        c.beginPath(); c.moveTo(-31, -10); c.quadraticCurveTo(1, -20, 33, -10); c.lineTo(1, -42); c.closePath(); c.fill(); c.stroke();
+        c.strokeStyle = 'rgba(120,90,40,.55)'; c.lineWidth = 1.2; for (const k of [-0.5, 0, 0.5]) { c.beginPath(); c.moveTo(1, -40); c.lineTo(1 + k * 30, -13); c.stroke(); }
+        c.restore();
+      }
       // things in hand
       const [hx, hy] = hd.near;
       c.save(); c.lineWidth = 1.2; c.strokeStyle = '#1b1722';
@@ -1705,8 +1720,9 @@ body.exploring::before { opacity: 0; }
       c.restore();
       return hd;
     }
+    function headAt(c, x, y, k, P, t, f = 1) { c.save(); c.translate(x, y); c.scale(k * f, k); c.translate(-1, 17); RIG.drawHead(c, look(P), { blink: false, mouth: P.mouth || 'smile' }, t || 0); c.restore(); }
     function head(c, P, hy, t) { c.save(); c.translate(0, hy + 15); RIG.drawHead(c, look(P), { blink: false, mouth: 'smile' }, t || 0); c.restore(); }
-    return { draw, head };
+    return { draw, head, headAt };
   })();
 
   function drawRJScene() {
